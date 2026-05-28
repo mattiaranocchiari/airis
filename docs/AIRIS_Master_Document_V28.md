@@ -1,1 +1,0 @@
-<!-- placeholder: AIRIS Master Document V28 — canonical content authored in the strategic channel and committed by Mattia in the first post-bootstrap strategy turn. Contains the architectural Decision Log (D.1…D.x). Overwrite this entire file with the canonical content. -->

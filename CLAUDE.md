@@ -20,7 +20,7 @@ The git repo is the only state shared between the strategic (Claude.ai chat) and
 1. `/CLAUDE.md` — this file. Operating rules.
 2. `/STATE.md` — current baton, stage/step, just-done, in-flight, next step.
 3. `/docs/AIRIS_Active_Plan.md` — cross-session execution plan.
-4. `/docs/AIRIS_Master_Document_V28.md` — architectural truth + Decision Log (D.1…D.x).
+4. `/docs/AIRIS_Master_Document.md` — architectural truth + Decision Log (D.1…D.x).
 5. `/docs/Project_Core.md` — project-specific invariants.
 6. `/docs/VIVA_Master_Document.md`, `/docs/Viva_Mode_Master_Document.md` — pattern foundations.
 7. `/infra/manifest.md` — non-git infra pointers (DB migration level, deployed versions, secret names).
@@ -79,7 +79,7 @@ The git repo is the only state shared between the strategic (Claude.ai chat) and
 ## Two decision logs
 
 - **`/docs/decision-log.md`** — operational chronology: every turn (date, channel, SHA, action).
-- **V28 `D.x` Decision Log** inside `AIRIS_Master_Document_V28.md` — architectural commitments (decision, rationale, alternatives, supersession, cross-refs).
+- **V28 `D.x` Decision Log** inside `AIRIS_Master_Document.md` — architectural commitments (decision, rationale, alternatives, supersession, cross-refs).
 - Every architectural decision lands in **both**: chronological entry now; promoted into the V28 log on the next atomic doc commit.
 
 ---

@@ -2,19 +2,17 @@
 
 **BATON:** strategy
 **Stage / Step:** 4 / 4.1
-**Updated:** 2026-05-28 by execution (Claude Code) — see latest commit on this branch
+**Updated:** 2026-05-28 by execution (Claude Code) — see latest commits on `main`
 
 ---
 
 ## Just done
 
-- Bootstrapped repo skeleton on branch `claude/kind-allen-Hupja`:
-  - `/CLAUDE.md` — operating manual (rituals, baton protocol, branch model, hard invariants)
-  - `/STATE.md` — this file
-  - `/docs/` — placeholders for the five canonical documents (`VIVA_Master_Document.md`, `Viva_Mode_Master_Document.md`, `AIRIS_Master_Document_V28.md`, `AIRIS_Active_Plan.md`, `Project_Core.md`)
-  - `/docs/decision-log.md` — operational chronological log
-  - `/infra/manifest.md` — non-git infra pointers (no secret values)
-- Branch pushed. No PR opened. `main` not yet established.
+- **Bootstrap scaffold** (commit `1e8780f`) on `claude/kind-allen-Hupja`:
+  - `/CLAUDE.md`, `/STATE.md`, `/docs/decision-log.md`, `/infra/manifest.md`
+  - `/docs/` with one-line placeholders for the five canonical documents: `VIVA_Master_Document.md`, `Viva_Mode_Master_Document.md`, `AIRIS_Master_Document.md`, `AIRIS_Active_Plan.md`, `Project_Core.md`.
+- **Rename + reference sweep** (this commit): `docs/AIRIS_Master_Document_V28.md` → `docs/AIRIS_Master_Document.md` (version-free filename per decision; version tracked in-header + git history). Updated every filename reference in `CLAUDE.md`, `STATE.md`, and `docs/decision-log.md` to the new name.
+- **Establishing merge:** `main` created at the `claude/kind-allen-Hupja` HEAD. `main` is now the audited trunk and the baton's only home.
 
 ## In flight / uncommitted
 
@@ -22,10 +20,9 @@
 
 ## Next concrete step
 
-1. **Mattia** performs the establishing merge of `claude/kind-allen-Hupja` to set `main` as trunk.
-2. **First strategy turn (chat → Mattia):** commit the existing five canonical documents into the placeholder files on `main`, in a single atomic commit. Update this file on the same commit with the new just-done, next-step, and (if execution work is queued) flip BATON → execution.
-3. Before any new strategic decision: Mattia re-feeds current `main` HEAD (canonical docs + `STATE.md`) into chat verbatim, per the CLAUDE.md ritual.
+1. **First strategy turn (chat → Mattia):** commit the existing five canonical documents into their placeholder files on `main`, in a single atomic commit. Update this `STATE.md` (just-done, next-step, baton flip if execution work is queued) and append `/docs/decision-log.md` on the same commit.
+2. Before any new strategic decision: Mattia re-feeds current `main` HEAD (canonical docs + `STATE.md`) into chat verbatim, per the CLAUDE.md ritual.
 
 ## Open questions for the other channel
 
-- None at handoff.
+- Non-filename V28 content references remain in `CLAUDE.md` (`V28 D.20`, `V28 D.21`, and the `V28 D.x Decision Log` section name) and in `docs/decision-log.md` (`V28 Decision Log` in the dual-logging rule). The rename scope was filename-only; these content references were intentionally left out of scope. Strategic channel: decide whether to neutralize them (e.g., reference decisions by number with version implicit from git/header) when committing canonical content, or keep them as version markers.
