@@ -305,7 +305,7 @@ export async function moveAppointmentByDrag(
   const oldEnd = new Date(existing.slot_end_at);
   const durationMs = oldEnd.getTime() - oldStart.getTime();
   const newStart = new Date(oldStart);
-  newStart.setHours(newHour, 0, 0, 0);
+  newStart.setUTCHours(newHour, 0, 0, 0);
   const newEnd = new Date(newStart.getTime() + durationMs);
 
   await updateAppointment(
@@ -724,6 +724,8 @@ function pad(n: number): string {
 }
 
 function prettySlot(iso: string): string {
+  // UTC to match grid bucketing (SchedulerGrid renders by UTC hour). See the
+  // note there on Phase 0 timezone handling.
   const d = new Date(iso);
-  return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  return `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
 }

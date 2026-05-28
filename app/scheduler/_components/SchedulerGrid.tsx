@@ -60,7 +60,12 @@ export function SchedulerGrid({ initial, tenantId, appendEntry }: Props) {
   const byHour = useMemo(() => {
     const out = new Map<number, GridAppointment[]>();
     for (const apt of appointments) {
-      const hour = new Date(apt.slot_start_at).getHours();
+      // Bucket by UTC hour to stay consistent with how slots are stored and
+      // how the server formats confirmations (Vercel/Node runs UTC). Keeps
+      // "book at 9" → grid row 09:00 → "booked at 09:00" coherent regardless
+      // of the viewer's timezone. A real clinic-local-time rendering is a
+      // post-validation concern (needs a per-clinic TZ).
+      const hour = new Date(apt.slot_start_at).getUTCHours();
       const arr = out.get(hour) ?? [];
       arr.push(apt);
       out.set(hour, arr);
@@ -71,12 +76,12 @@ export function SchedulerGrid({ initial, tenantId, appendEntry }: Props) {
   async function handleDrop(appointmentId: string, newHour: number, dragDropTs: number) {
     const apt = appointments.find((a) => a.id === appointmentId);
     if (!apt) return;
-    const oldHour = new Date(apt.slot_start_at).getHours();
+    const oldHour = new Date(apt.slot_start_at).getUTCHours();
     if (oldHour === newHour) return;
 
     const oldStart = new Date(apt.slot_start_at);
     const newStart = new Date(oldStart);
-    newStart.setHours(newHour, 0, 0, 0);
+    newStart.setUTCHours(newHour, 0, 0, 0);
     const durationMs =
       new Date(apt.slot_end_at).getTime() - new Date(apt.slot_start_at).getTime();
     const newEnd = new Date(newStart.getTime() + durationMs);

@@ -18,7 +18,9 @@ describe("consciousness.resolveReference (L3 path)", () => {
       kind: "create",
       appointmentId: "apt-1",
       when: new Date().toISOString(),
-      slotStartLocal: new Date(2026, 4, 29, 9, 0).toISOString(),
+      // Date.UTC so the test asserts against UTC hours regardless of the
+      // runner's timezone (resolve buckets by getUTCHours).
+      slotStartLocal: new Date(Date.UTC(2026, 4, 29, 9, 0)).toISOString(),
     });
     const result = await resolveReference(
       // db is unused on the L3 hit path
@@ -40,7 +42,7 @@ describe("consciousness.resolveReference (L3 path)", () => {
       kind: "create",
       appointmentId: "apt-2",
       when: new Date().toISOString(),
-      slotStartLocal: new Date(2026, 4, 29, 14, 0).toISOString(),
+      slotStartLocal: new Date(Date.UTC(2026, 4, 29, 14, 0)).toISOString(),
     });
     const result = await resolveReference(null as never, {
       reference: "the 14",

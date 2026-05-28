@@ -86,5 +86,8 @@ function parseHour(reference: string): number | null {
 }
 
 function slotHour(slotIso: string): number {
-  return new Date(slotIso).getHours();
+  // UTC to match the rest of the scheduler's hour handling (slots stored +
+  // rendered in UTC Phase 0). "the 9 a.m." → parseHour 9 → matches a slot
+  // stored at 09:00Z. See the SchedulerGrid timezone note.
+  return new Date(slotIso).getUTCHours();
 }
