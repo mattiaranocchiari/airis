@@ -47,7 +47,7 @@ The git repo is the only state shared between the strategic (Claude.ai chat) and
 
 1. Update `/STATE.md` (just done, in flight, next step, baton flip).
 2. Append `/docs/decision-log.md` (date, channel, SHA, action).
-3. If any decision is architectural: queue promotion into the V28 `D.x` log on the next atomic doc commit.
+3. If any decision is architectural: queue promotion into the `D.x` Decision Log on the next atomic doc commit.
 4. Commit + push. Turn closer:
    - **Strategy turn:** push to `main` = closes the turn.
    - **Execution turn:** PR merge to `main` = closes the turn.
@@ -79,14 +79,20 @@ The git repo is the only state shared between the strategic (Claude.ai chat) and
 ## Two decision logs
 
 - **`/docs/decision-log.md`** — operational chronology: every turn (date, channel, SHA, action).
-- **V28 `D.x` Decision Log** inside `AIRIS_Master_Document.md` — architectural commitments (decision, rationale, alternatives, supersession, cross-refs).
-- Every architectural decision lands in **both**: chronological entry now; promoted into the V28 log on the next atomic doc commit.
+- **`D.x` Decision Log** inside `AIRIS_Master_Document.md` — architectural commitments (decision, rationale, alternatives, supersession, cross-refs).
+- Every architectural decision lands in **both**: chronological entry now; promoted into the `D.x` Decision Log on the next atomic doc commit.
 
 ---
 
 ## Build / test commands
 
-TBD — stack not yet initialized. Update this section when the first code lands.
+- `npm install` — install dependencies.
+- `npm run dev` — local dev server on `http://localhost:3000` (Turbopack).
+- `npm run build` — production build.
+- `npm start` — serve the production build.
+- `npm run lint` — ESLint (Next + TypeScript rules).
+
+Test runner not yet installed — added when the first endpoint lands (Step 4.2).
 
 ---
 
@@ -99,9 +105,3 @@ If context is auto-compacted, preserve:
 3. The rituals.
 
 Tool-output history can be dropped; everything important is already in the repo.
-
----
-
-## Current bootstrap state
-
-This repo was just scaffolded by the execution channel. The five canonical docs in `/docs/` are placeholders; the first post-bootstrap **strategy turn** lands their content. `main` does not yet exist — the first merge of `claude/kind-allen-Hupja` establishes it.

@@ -9,7 +9,7 @@ Update on every change to deployed infrastructure or environment configuration.
 ## Repository
 
 - **GitHub:** `mattiaranocchiari/airis`
-- **Default branch:** `main` (to be established via the first merge of `claude/kind-allen-Hupja`)
+- **Default branch:** `main`
 
 ## Supabase
 
@@ -20,6 +20,16 @@ Update on every change to deployed infrastructure or environment configuration.
 - **Postgres version:** 17
 - **Migration level:** 0 (no migrations applied yet)
 - **Schema state:** empty
+
+## App
+
+- **Framework:** Next.js 16 (App Router, TypeScript, Turbopack).
+- **Styling:** Tailwind CSS 4.
+- **Linter:** ESLint 9 (`eslint-config-next`).
+- **Package manager:** npm.
+- **Node:** verified on Node 22 (Next 16 requires Node ≥ 18.18).
+- **Entry points:** `app/layout.tsx`, `app/page.tsx`.
+- **Scripts:** `npm run dev | build | start | lint` (see `CLAUDE.md`).
 
 ## Vercel
 
