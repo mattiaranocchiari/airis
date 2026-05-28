@@ -7,9 +7,12 @@ export {
   writeContext,
   recordAction,
   recordUtterance,
+  setPendingDisambiguation,
+  clearPendingDisambiguation,
   clearForTest,
   _clearAllForTest,
   type ConsciousnessContext,
+  type PendingDisambiguation,
 } from "@/lib/consciousness/cache";
 
 export { resolveReference, type ResolveReferenceResult } from "@/lib/consciousness/resolve";

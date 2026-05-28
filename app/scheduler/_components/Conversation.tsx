@@ -10,15 +10,10 @@ import {
 import { PushToTalk } from "@/app/scheduler/_components/PushToTalk";
 import { speak } from "@/lib/voice/tts";
 
-type Entry =
+export type ConversationEntry =
   | { id: string; role: "clinician"; text: string }
   | { id: string; role: "system"; text: string }
-  | {
-      id: string;
-      role: "system";
-      text: string;
-      pendingContrast: PendingContrast;
-    }
+  | { id: string; role: "system"; text: string; pendingContrast: PendingContrast }
   | {
       id: string;
       role: "system";
@@ -26,18 +21,17 @@ type Entry =
       candidates: { id: string; label: string }[];
     };
 
-export function Conversation() {
-  const [entries, setEntries] = useState<Entry[]>([]);
+type Props = {
+  entries: ConversationEntry[];
+  appendEntry: (entry: ConversationEntry) => void;
+};
+
+export function Conversation({ entries, appendEntry }: Props) {
   const [input, setInput] = useState("");
   const [pending, startTransition] = useTransition();
 
-  function append(entry: Entry) {
-    setEntries((prev) => [...prev, entry]);
-  }
-
   async function dispatch(text: string, micCloseTs: number) {
-    const utteranceId = crypto.randomUUID();
-    append({ id: utteranceId, role: "clinician", text });
+    appendEntry({ id: crypto.randomUUID(), role: "clinician", text });
     const result = await interpretUtterance(text, micCloseTs);
     handleResult(result);
   }
@@ -49,22 +43,22 @@ export function Conversation() {
         ? result.timing.broadcastSentTs - result.timing.micCloseTs
         : null;
       const latencyTxt = latency !== null ? ` (${latency} ms end-to-end)` : "";
-      append({ id: replyId, role: "system", text: `${result.message}${latencyTxt}` });
+      appendEntry({ id: replyId, role: "system", text: `${result.message}${latencyTxt}` });
       speak(result.message);
     } else if (result.kind === "needs_disambiguation") {
-      append({ id: replyId, role: "system", text: result.reason, candidates: result.candidates });
+      appendEntry({
+        id: replyId,
+        role: "system",
+        text: result.reason,
+        candidates: result.candidates,
+      });
       speak(result.reason);
     } else if (result.kind === "needs_egfr_confirmation") {
       const readback = `eGFR last value ${result.appointment.egfr_value} — confirm contrast?`;
-      append({
-        id: replyId,
-        role: "system",
-        text: readback,
-        pendingContrast: result.appointment,
-      });
+      appendEntry({ id: replyId, role: "system", text: readback, pendingContrast: result.appointment });
       speak(readback);
     } else {
-      append({ id: replyId, role: "system", text: `error: ${result.reason}` });
+      appendEntry({ id: replyId, role: "system", text: `error: ${result.reason}` });
     }
   }
 
@@ -103,10 +97,24 @@ export function Conversation() {
               </button>
             ) : null}
             {"candidates" in entry && entry.candidates ? (
-              <ul className="mt-2 space-y-1">
+              <ul className="mt-2 flex flex-wrap gap-1">
                 {entry.candidates.map((c) => (
-                  <li key={c.id} className="text-xs text-zinc-500">
-                    • {c.label}
+                  <li key={c.id}>
+                    <button
+                      type="button"
+                      className="rounded border border-zinc-300 px-2 py-1 text-xs hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900"
+                      disabled={pending}
+                      onClick={() => {
+                        if (pending) return;
+                        const text = c.label;
+                        const micCloseTs = Date.now();
+                        startTransition(() => {
+                          void dispatch(text, micCloseTs);
+                        });
+                      }}
+                    >
+                      {c.label}
+                    </button>
                   </li>
                 ))}
               </ul>

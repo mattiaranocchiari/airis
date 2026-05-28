@@ -101,18 +101,42 @@ First sketches in `lib/consciousness/` and `lib/realtime/channel.ts`:
   disambiguation triggers, and the Tier-3 contrast read-back path). Founder
   reviews + extends with clinical-context hard cases.
 
+### Disambiguation auto-retry (L3 substrate carries the pending intent)
+
+When a `book_appointment` intent resolves to multiple matching patients,
+the server action stashes the booking inputs (room, kind, subtype, slot,
+contrast flag, notes, candidates) in the L3 cache as
+`pendingDisambiguation`. The next `disambiguate_patient` intent reads that
+pending entry, matches the user's selection against the candidate list
+(label substring + ordinal fallback like "the second one"), and **resumes
+the original booking automatically** — including the Tier-3 eGFR check if
+the original intent carried `with_contrast: true`. The clinician never
+re-issues the booking utterance. The "feels like one event" property
+survives the disambiguation case. L3 is cleared on success; if the
+selection is itself ambiguous or matches nothing, the pending stays
+parked and the conversation surface re-prompts.
+
 ### UI dual-surface
 
 - `app/scheduler/page.tsx` — server-rendered CT1 day-grid + conversation
   panel. Force-dynamic; reads `tenant_id` from the JWT app_metadata.
+- `app/scheduler/SchedulerWorkbench.tsx` — client wrapper that lifts the
+  conversation entries above both surfaces so a content-surface drag-to-move
+  can emit a system message into the conversation panel without asking a
+  question. This is the content→conversation direction of the dual-surface
+  paradigm.
 - `SchedulerGrid` (client) — subscribes to `tenant:{tenant_id}:scheduler:CT1`
   on mount, refetches the grid via the `loadGridForCT1` server action when a
-  broadcast arrives. `useTransition` for the optimistic-pending UX. Sub-500
-  ms perceived latency is measured by the timing trace returned from
-  `interpretUtterance` (see Failure-mode triggers below).
+  broadcast arrives. `useTransition` for the optimistic-pending UX.
+  **Drag-to-move**: appointment cards are HTML5-draggable; hour rows accept
+  drops; optimistic local move + `moveAppointmentByDrag` server action +
+  audit-chain RPC + L2 broadcast + system message ("moved to 11:00") in the
+  conversation panel — no question asked. On error, the optimistic move
+  reverts and the conversation surface explains.
 - `Conversation` (client) — push-to-talk + text-input fallback. Shows
-  disambiguation candidate lists and the Tier-3 eGFR contrast read-back with
-  a "Confirm with contrast" button.
+  disambiguation candidate lists as **clickable buttons** (each click sends
+  the candidate label as the next utterance) and the Tier-3 eGFR contrast
+  read-back with a "Confirm with contrast" button.
 - `PushToTalk` (client) — browser-native `SpeechRecognition` (Chrome/Edge
   English). Zero external STT keys for the first preview deploy; Deepgram
   English or AssemblyAI English lands behind the same `onTranscript`

@@ -1,8 +1,7 @@
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { loadGridForCT1 } from "@/app/scheduler/actions";
-import { SchedulerGrid } from "@/app/scheduler/_components/SchedulerGrid";
-import { Conversation } from "@/app/scheduler/_components/Conversation";
+import { SchedulerWorkbench } from "@/app/scheduler/SchedulerWorkbench";
 
 export const dynamic = "force-dynamic";
 
@@ -27,10 +26,5 @@ export default async function SchedulerPage() {
 
   const { appointments } = await loadGridForCT1();
 
-  return (
-    <main className="grid h-full flex-1 grid-cols-1 gap-4 p-6 lg:grid-cols-[1fr_400px]">
-      <SchedulerGrid initial={appointments} tenantId={tenantId} />
-      <Conversation />
-    </main>
-  );
+  return <SchedulerWorkbench initial={appointments} tenantId={tenantId} />;
 }
