@@ -75,6 +75,8 @@ export async function deleteTestClinician(c: TestClinician): Promise<void> {
   // Order matters: child rows first (the FKs cascade to tenant).
   await admin.from("event_queue").delete().eq("tenant_id", c.tenantId);
   await admin.from("audit_events").delete().eq("tenant_id", c.tenantId);
+  await admin.from("egfr_results").delete().eq("tenant_id", c.tenantId);
+  await admin.from("appointments").delete().eq("tenant_id", c.tenantId);
   await admin.from("patients").delete().eq("tenant_id", c.tenantId);
   await admin.from("clinician_profiles").delete().eq("id", c.authUserId);
   await admin.from("tenants").delete().eq("id", c.tenantId);

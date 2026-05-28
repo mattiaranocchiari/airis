@@ -7,6 +7,9 @@ import {
   type TestClinician,
 } from "./lib/test-clinician";
 import type { CloudEvent } from "@/lib/cloudevents";
+import { hasLiveDbEnv } from "./setup";
+
+const describeIfLiveDb = hasLiveDbEnv ? describe : describe.skip;
 
 // End-to-end round trip against the real Supabase project: create + update +
 // delete a patient as an RLS-scoped clinician, then verify (with the admin
@@ -18,7 +21,7 @@ import type { CloudEvent } from "@/lib/cloudevents";
 // Tenant isolation enforced via test-only tenant ids per run; teardown
 // removes every row belonging to those tenants.
 
-describe("Patient Registry round trip", () => {
+describeIfLiveDb("Patient Registry round trip", () => {
   let clinician: TestClinician;
 
   beforeEach(async () => {

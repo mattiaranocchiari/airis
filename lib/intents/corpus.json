@@ -1,0 +1,172 @@
+[
+  {
+    "id": "view-01",
+    "utterance": "Show me today's schedule for CT1.",
+    "expected": { "intent": "view_schedule", "room_id": "CT1", "when": "today" }
+  },
+  {
+    "id": "view-02",
+    "utterance": "What's on CT1 tomorrow?",
+    "expected": { "intent": "view_schedule", "room_id": "CT1", "when": "tomorrow" }
+  },
+  {
+    "id": "view-03",
+    "utterance": "Pull up the CT1 grid for tomorrow.",
+    "expected": { "intent": "view_schedule", "room_id": "CT1", "when": "tomorrow" }
+  },
+  {
+    "id": "view-04",
+    "utterance": "Show the schedule.",
+    "expected": { "intent": "view_schedule", "room_id": "CT1", "when": "today" }
+  },
+  {
+    "id": "view-05",
+    "utterance": "Today's CT1 schedule please.",
+    "expected": { "intent": "view_schedule", "room_id": "CT1", "when": "today" }
+  },
+  {
+    "id": "book-01",
+    "utterance": "Book a CT abdomen for Marco Rossi tomorrow at 9.",
+    "expected": {
+      "intent": "book_appointment",
+      "room_id": "CT1",
+      "patient_query": "Marco Rossi",
+      "kind": "CT",
+      "subtype": "abdomen",
+      "with_contrast": false
+    }
+  },
+  {
+    "id": "book-02",
+    "utterance": "Schedule a CT chest with contrast for Marco Rossi today at 14:30.",
+    "expected": {
+      "intent": "book_appointment",
+      "room_id": "CT1",
+      "patient_query": "Marco Rossi",
+      "kind": "CT",
+      "subtype": "chest",
+      "with_contrast": true
+    }
+  },
+  {
+    "id": "book-03-abbrev",
+    "utterance": "Book a CT abd for Anna Bianchi tomorrow at 10.",
+    "expected": {
+      "intent": "book_appointment",
+      "room_id": "CT1",
+      "patient_query": "Anna Bianchi",
+      "kind": "CT",
+      "subtype": "abdomen",
+      "with_contrast": false
+    }
+  },
+  {
+    "id": "book-04-latin",
+    "utterance": "Book a CT thorax with contrast IV non-urgent for Giulia Verdi tomorrow at 8:30.",
+    "expected": {
+      "intent": "book_appointment",
+      "room_id": "CT1",
+      "patient_query": "Giulia Verdi",
+      "kind": "CT",
+      "subtype": "thorax",
+      "with_contrast": true
+    }
+  },
+  {
+    "id": "book-05-slash",
+    "utterance": "Schedule a CT chest w/ contrast for Rossi tomorrow at 11.",
+    "expected": {
+      "intent": "book_appointment",
+      "room_id": "CT1",
+      "patient_query": "Rossi",
+      "kind": "CT",
+      "subtype": "chest",
+      "with_contrast": true
+    }
+  },
+  {
+    "id": "book-06-disamb",
+    "utterance": "Book a CT for Rossi tomorrow at 9.",
+    "expected": {
+      "intent": "book_appointment",
+      "room_id": "CT1",
+      "patient_query": "Rossi",
+      "kind": "CT",
+      "subtype": null,
+      "with_contrast": false
+    }
+  },
+  {
+    "id": "book-07-highstakes",
+    "utterance": "Book a CT abdomen with contrast for Marco Rossi tomorrow at 9.",
+    "expected": {
+      "intent": "book_appointment",
+      "room_id": "CT1",
+      "patient_query": "Marco Rossi",
+      "kind": "CT",
+      "subtype": "abdomen",
+      "with_contrast": true
+    }
+  },
+  {
+    "id": "move-01",
+    "utterance": "Move the 9 a.m. to 11.",
+    "expected": {
+      "intent": "move_appointment",
+      "reference": "the 9 a.m."
+    }
+  },
+  {
+    "id": "move-02",
+    "utterance": "Move the 9 to 11.",
+    "expected": {
+      "intent": "move_appointment",
+      "reference": "the 9"
+    }
+  },
+  {
+    "id": "move-03",
+    "utterance": "Shift that to 14:00.",
+    "expected": {
+      "intent": "move_appointment",
+      "reference": "that"
+    }
+  },
+  {
+    "id": "cancel-01",
+    "utterance": "Cancel the 9 a.m.",
+    "expected": {
+      "intent": "cancel_appointment",
+      "reference": "the 9 a.m."
+    }
+  },
+  {
+    "id": "cancel-02",
+    "utterance": "Cancel that.",
+    "expected": {
+      "intent": "cancel_appointment",
+      "reference": "that"
+    }
+  },
+  {
+    "id": "cancel-03",
+    "utterance": "Drop the Rossi appointment tomorrow.",
+    "expected": {
+      "intent": "cancel_appointment",
+      "reference": "the Rossi appointment tomorrow"
+    }
+  },
+  {
+    "id": "disambig-01",
+    "utterance": "Marco.",
+    "expected": { "intent": "disambiguate_patient", "selection": "Marco" }
+  },
+  {
+    "id": "disambig-02",
+    "utterance": "The second one.",
+    "expected": {
+      "intent": "disambiguate_patient",
+      "selection": "the second one"
+    }
+  }
+]
