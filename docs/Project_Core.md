@@ -13,7 +13,7 @@ VIVA — values, philosophy, vision
 └── Viva mode — solution / pattern for creating solutions
       → Viva Mode Master Document
     │
-    └── AIRIS — hospital information system (first Viva mode application)
+    └── AIRIS — hospital information system; international platform, Italy as first deployment market (first Viva mode application)
           → AIRIS Master Document  (currently V28)
           → AIRIS Active Plan (operational counterpart to V28)
 ```
