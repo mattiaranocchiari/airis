@@ -12,7 +12,7 @@ export default async function SchedulerPage() {
     data: { user },
   } = await db.auth.getUser();
   if (!user) {
-    redirect("/");
+    redirect("/login?next=/scheduler");
   }
   const tenantId = (user.app_metadata as { tenant_id?: string }).tenant_id;
   if (!tenantId) {
