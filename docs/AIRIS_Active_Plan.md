@@ -1,0 +1,1 @@
+<!-- placeholder: AIRIS Active Plan — cross-session execution plan, authored in the strategic channel and committed by Mattia in the first post-bootstrap strategy turn. Overwrite this entire file with the canonical content. -->
