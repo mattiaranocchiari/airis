@@ -37,7 +37,7 @@ The Stance shapes what AIRIS is and isn't:
 
 - AIRIS is **not** a chatbot. It is not a voice assistant. It is not a conversational layer wrapping a traditional HIS.
 - AIRIS **is** a hospital information system whose primary interaction model is the dual-surface paradigm. The traditional HIS functions (orders, scheduling, results, charting, integration with existing hospital systems) all exist; they are mediated through the paradigm.
-- AIRIS is **Italian-first** by deliberate market choice (not "translated to Italian"). Italian medical terminology, Italian regulatory context, Italian clinical workflows, Italian language voice quality are foundational, not bolted on.
+- AIRIS is an **international platform with Italy as the first deployment market**. The platform architecture (the dual-surface paradigm, the consciousness substrate, the eleven-module structure, the engineering architecture in Part II Section 17) is language- and locale-agnostic by construction; market-specific content lives in a localization layer produced per market. Italy is the first deployment market: Italian medical terminology, Italian regulatory context (FSE 2.0, codice fiscale, FNOMCeO, NIS2 / HDS), Italian clinical workflows, and Italian voice quality are produced at first-market depth — not bolted on, but living in Italy's localization layer rather than as platform-wide commitments. Subsequent markets carry their own localization layer; the platform underneath is the same. See Decision Log D.24.
 - AIRIS is **module-independent** (per Section 0.6 working principle below) — each clinical module (Radiology, Cardiology, Emergency, etc.) is internally coherent and can be deployed/used independently while sharing the substrate.
 
 ## 0.3 Working Principles
@@ -46,13 +46,13 @@ These principles drive how AIRIS is designed, built, deployed, and evolved. Comm
 
 ### 0.3.1 Real UX, Minimal Infrastructure
 
-User-facing reality is uncompromised. The dual-surface paradigm, Italian intent parsing, consciousness substrate behavior, voice quality, patient flows, scheduling, ordering, regulatory artifact generation — all real, production-discipline code per Working Principle 0.3.3 below.
+User-facing reality is uncompromised. The dual-surface paradigm, locale-aware intent parsing (English platform default; per-market localization per D.24), consciousness substrate behavior, voice quality, patient flows, scheduling, ordering, regulatory artifact generation — all real, production-discipline code per Working Principle 0.3.3 below.
 
 Backing infrastructure is the simplest that delivers uncompromised UX. Managed SaaS free tiers (Supabase managed EU, Vercel free tier) are acceptable Phase 0 / early Phase A; self-hosted production topology moves to Phase D pre-deployment work where it actually matters (hospital sovereignty, NIS2, HDS certification, GPU at scale).
 
 What protects this principle from UX compromise: the architectural abstractions committed in Section 17 (Supabase SDK identical managed vs OSS; three-backend LLM abstraction; CloudEvents envelope; AIRIS-native contracts read/write/subscribe/resolve). These ensure infrastructure migration is config-swap not rewrite. Managed-now → self-hosted-later happens without code change.
 
-**Critical discipline**: The three-backend LLM abstraction (Section 17.5) gets built from Phase A core systems onward, not deferred to Phase D. Without this discipline, local LLM quality limits could become UX compromises. With it, local Ollama stays active backend; Bedrock EU + Mistral La Plateforme EU are configured fallbacks for per-case use where local quality genuinely insufficient (complex Italian medical reasoning beyond 7B-14B quantized model capability).
+**Critical discipline**: The engine-agnostic LLM substrate abstraction (Section 17.5; three deployment modes — client-local self-hosted, online APIs, AIRIS-hosted non-HQ — per D.21) gets built from Phase A core systems onward, not deferred to Phase D. Without this discipline, the current concrete backend choice (Claude API in Phase 0; see D.22) becomes a load-bearing commitment rather than a per-deployment selection. With it, the active engine is a deployment-time decision; the application code is identical across modes.
 
 ### 0.3.2 SW-First Sequencing
 
@@ -139,8 +139,9 @@ This principle pairs with Working Principle 0.3.7 (Audit Discipline) — coheren
 
 Specific commitments downstream of Part 0 principles:
 
-- **Phase 0 procurement** (Active Plan Stage 4 Step 4.1) — Supabase managed EU free tier + Vercel free tier + existing Ollama VPS + Claude Code Pro subscription. ~$20/mo. Driven by Working Principle 0.3.1 (Real UX, Minimal Infrastructure).
-- **Three-backend LLM abstraction built from Step 4.5** — not deferred. Driven by Working Principle 0.3.1 (UX protection) + Working Principle 0.3.8 (Architecture Through Abstractions).
+- **Phase 0 procurement** (Active Plan Stage 4 Step 4.1) — Supabase managed EU free tier + Vercel free tier + Claude API as current concrete LLM backend (per D.22) + Claude Code Pro subscription. ~$20/mo plus LLM usage. Driven by Working Principle 0.3.1 (Real UX, Minimal Infrastructure).
+- **Engine-agnostic LLM substrate abstraction built from Step 4.5** (per D.21) — not deferred. Three deployment modes (client-local self-hosted, online APIs, AIRIS-hosted non-HQ); concrete engine chosen per deployment. Driven by Working Principle 0.3.1 (UX protection) + Working Principle 0.3.8 (Architecture Through Abstractions).
+- **International platform; Italy as first deployment market** (per D.24) — platform architecture locale-agnostic by construction; Italian content in Section 17 + D.18 + D.19 is Italy's localization layer at first-market depth, not a platform-wide commitment. Sister abstraction to the engine-agnostic substrate. Driven by Working Principle 0.3.8 (Architecture Through Abstractions).
 - **Pack workstreams Stage 5 (not parallel Phase 0)** — driven by Working Principle 0.3.2 (SW-First Sequencing).
 - **Phase D pre-deployment infrastructure work** — full Hostinger production topology per deep research (Part VII Section 7.3) provisioned when hospital deployment context matters. Driven by Working Principle 0.3.1 (Minimal Infrastructure) + Working Principle 0.3.3 (Code Stays Same).
 - **Modules at varying depth Phase A** (per V27 D.10 / V28 Decision Log D.10) — Radiology + one cross-module flow deep; other 9 honest-partial. Driven by Working Principle 0.3.5 (Production Discipline Within Scope, Honest Absence Outside).
@@ -206,7 +207,9 @@ The IT department finds, over time, that the integrations and workarounds and cu
 
 AIRIS is the entire information and workflow layer of a hospital — patient information and registration, order management, scheduling and resource allocation, clinical documentation and reporting, workflow management, inter-department communication, and administrative functions that support clinical work. AIRIS is not a PACS, does not replace specialized clinical tools (DICOM modalities, ECG viewers, lab analyzers), does not handle medication dispensing or external insurance claims processing. These remain external systems that AIRIS connects to through its integration layer, designed to minimize what needs to be external.
 
-The first market is Italy. The choice is not arbitrary. Italian medicine has a strong tradition of clinical craft that the current generation of hospital software has been particularly hard on. The bureaucratic burden on Italian clinicians is visible, measurable, and universally complained about. The regulatory environment is well-defined enough to be designed for. Starting in Italy is starting where the philosophy has both the clearest stakes and the clearest fit.
+AIRIS is designed as an **international platform**. The platform architecture (the dual-surface paradigm, the consciousness substrate, the eleven-module structure, the engineering architecture in Part II Section 17) is language- and locale-agnostic by construction; market-specific content — medical terminology, regulatory regimes, clinical workflows, voice quality — lives in a localization layer produced per market.
+
+The **first deployment market is Italy**. The choice is not arbitrary. Italian medicine has a strong tradition of clinical craft that the current generation of hospital software has been particularly hard on. The bureaucratic burden on Italian clinicians is visible, measurable, and universally complained about. The regulatory environment is well-defined enough to be designed for. Starting in Italy is starting where the philosophy has both the clearest stakes and the clearest fit. Italy's localization — Italian medical terminology, Italian voice character, Italian regulatory artifacts (FSE 2.0 / SDO / NSIS), Italian identity composition (codice fiscale / FNOMCeO / albo), Italian-specific MPI handling, Italian incumbent-landscape positioning — is committed at first-market depth in Section 17 and elsewhere; this is the moat for the first market and the basis of the AGFA-Italy beachhead. The platform underneath generalizes to subsequent markets without architectural change. See Decision Log D.24 for the architectural commitment.
 
 **Note on Phase A demonstration scope (since V26):** AIRIS-the-product is eventually all eleven modules at full clinical depth. Phase A's job is to make the philosophy and the breadth-of-coverage value proposition real and demonstrable to AGFA, not to deliver all eleven modules at full depth — that happens in Phase C (with clinical partners) and Phase D (with hospital deployment). Phase A delivers: Radiology built deep; one additional module (Emergency or Cardiology) built deep enough for cross-module flow; the other nine present at honest-partial depth (architecturally real, conveying the module's shape, with workflow depth deferred visibly to Phase C). See Part IV Section 3 for the full scope; Part III D.10 for the reasoning.
 
@@ -11688,7 +11691,7 @@ Section 17 substantive content is preserved from V27. The strategic + operationa
 Section 17 specifies the AIRIS *production architecture target*. Phase 0 / early Phase A operational reality (per Working Principle 0.3.1) uses simpler infrastructure that the abstractions in Section 17 make swappable without code change:
 
 - Section 17.1 Supabase Postgres EU → Phase 0/A operational: managed Supabase EU free tier; Phase D: self-hosted Supabase OSS per Hostinger deep research findings.
-- Section 17.5 LLM substrate → Phase 0/A operational: existing Ollama VPS as active backend (per founder direction); Phase D: vLLM on Hetzner GEX44 or OVHcloud L40S HDS-certified. Three-backend abstraction (V27 §17.5 / V28 Section 17.5) built from Phase A core systems Step 4.5 — protects UX, allows per-case backend selection.
+- Section 17.5 LLM substrate → Phase 0/A operational: **Claude API as current concrete backend** (an instance of deployment mode 2 — online APIs — per D.21 / D.22). Phase D and beyond: engine + deployment mode chosen per deployment from the three-mode abstraction (client-local self-hosted; online APIs; AIRIS-hosted non-HQ). Engine-agnostic substrate abstraction built from Phase A core systems Step 4.5 — protects UX, allows per-deployment backend selection without code change. (D.21 + D.22 supersede the V27 / earlier-V28 framing that named specific engines like Ollama / Bedrock EU / Mistral La Plateforme EU as platform commitments. Those names are illustrative deployment options, not committed platform engines.)
 - Section 17.2 Backend services tier → Phase 0/A operational: Next.js calls Ollama directly; Python services tier provisioned when Phase A core systems work needs it. Phase D: Hostinger KVM 4 Germany or Hetzner per topology research.
 - Section 17.16 SRE observability → Phase 0/A operational: Supabase dashboard + Vercel dashboard sufficient until production traffic exists. Phase D: full Sentry + Grafana + Better Stack stack per Section 17.16.
 - Section 17.18 Backup 3-2-1 → Phase 0/A operational: Supabase PITR sufficient. Phase D: full 3-2-1 with Hetzner Storage Box + Backblaze B2 EU per Section 17.18.
@@ -11706,6 +11709,11 @@ Five concrete stack updates from research, applicable when Phase D pre-deploymen
 Recommended production topology: 3× Hostinger KVM 4 + 1× Hostinger KVM 2 + 1× Hostinger KVM 1 dev + Hetzner GEX44 + Backblaze B2 EU + Hetzner Storage Box. ~€67/mo promo / €122/mo renewal on Hostinger + €184/mo Hetzner GPU + ~€10/mo backup = ~€280-370/mo Phase D pre-deployment production run-rate.
 
 **Architectural consequence:** Section 17 commitments remain operationally aspirational for Phase 0 / early Phase A (managed-now → self-hosted-later via abstractions) and operationally concrete for Phase D pre-deployment (full topology provisioned per Hostinger research). The discipline that makes this coherent: Working Principle 0.3.8 (Architecture Through Abstractions, Not Infrastructure Identity).
+
+**Two cross-cutting reframes apply to all of Section 17** (strategy session 2026-05-28; promoted into D.21 / D.22 / D.24 in this commit):
+
+- **Engine-agnostic LLM substrate** (per D.21 / D.22). All references in Section 17 to specific LLM engines or hosting (e.g., "AWS Bedrock EU inference profile," "Mistral La Plateforme EU," "Ollama / Hostinger / Hetzner GPU for LLM serving," "Claude Sonnet 4.6 via Bedrock EU") are illustrative deployment options under the engine-agnostic abstraction, **not** platform commitments. The platform commits to a stable AIRIS-internal LLM-call interface (§17.5) and to three supported deployment modes (client-local self-hosted, online APIs, AIRIS-hosted non-HQ). The current concrete backend is Claude API direct (per D.22 + `infra/manifest.md`); the abstraction lands at Step 4.5. Substantive Section 17 content otherwise unchanged.
+- **International platform; Italy as first deployment market** (per D.24). All Italian-specific content in Section 17 (§17.6 voice stack, §17.7 Regulatory Layer, §17.8 Patient Flow Layer Italian-identity edges, §17.13 Italian clinician identity composition, §17.21 Italian incumbent landscape, §17.22 EU residency posture, §17.23 doppio audit) is **Italy's localization layer at first-market depth** — committed for the first deployment market, not a platform-wide commitment. The platform architecture (substrate, paradigm, eleven-module structure, engineering architecture) is language- and locale-agnostic by construction. Subsequent markets carry their own localization layer; Italian content is preserved here as the moat for the first market.
 
 ---
 
@@ -11776,11 +11784,23 @@ The Consciousness Substrate is a **six-layer architecture bound by four AIRIS-na
 
 #### 17.5 LLM substrate
 
-- **Primary**: AWS Bedrock EU inference profile for Claude (`eu.anthropic.claude-sonnet-4-5-20250929-v1:0` + Haiku 4.5). Anthropic first-party EU "Coming 2026" per regional compliance page; no firm date.
-- **Fallback**: Mistral La Plateforme EU (default EU residency per Mistral docs).
-- **Anthropic memory tool**: acceptable for agent-internal scratchpads only (ZDR-eligible). NOT the substrate.
-- **Prompt caching mandatory + SLO discipline** per Anthropic's Claude Code engineering team learnings (April 2026): "we build our entire harness around prompt caching... we declare SEVs if cache hit rate too low." Cache reads cost 10% of standard input ($0.30/MTok vs $3.00 on Sonnet 4.6) and meaningfully cut TTFT.
-- **March 2026 cache TTL change** (60min → 5min default for many Claude requests): automations spaced wider than 5min apart must explicitly request 1-hour TTL beta header or accept material cache-miss cost increase.
+**Engine-agnostic abstraction** (per D.21). AIRIS code calls an LLM through a stable AIRIS-internal interface; the concrete engine and the deployment mode behind the interface are a per-deployment configuration choice, not a platform-wide commitment. The platform commits to the interface and the three supported deployment modes; the platform does **not** commit to any specific engine, model, vendor, or hosting topology.
+
+**Three deployment modes supported by the abstraction** (per D.21):
+
+- **Mode 1 — Client-local self-hosted.** LLM engine runs inside the client's environment (hospital data centre, sovereign cloud region the client controls, on-prem appliance). For clients whose procurement, regulatory posture, or sovereignty requirements demand no outbound LLM traffic.
+- **Mode 2 — Online API.** LLM engine accessed via a vendor API (e.g., Claude API directly; or via a cloud inference profile). For clients comfortable with the vendor's residency and data-handling guarantees.
+- **Mode 3 — AIRIS-hosted, non-HQ.** LLM engine hosted by AIRIS in a region / account distinct from HQ infrastructure, for clients who want a managed-by-us option without an outbound API dependency on a third-party vendor.
+
+**Current concrete backend** (per D.22): **Claude API direct** (an instance of Mode 2). Used for Phase 0 development and current deployments. Specific model selection (Claude family member + version) is tracked operationally in `infra/manifest.md`, not committed in this Master Doc.
+
+**Per-deployment selection.** At deployment time, the substrate is wired to whichever engine + mode the deployment requires. Application code, prompt assets, intent schemas, evaluation harness, and observability are identical across modes. Engine swaps are configuration, not rewrite.
+
+**Prompt caching + SLO discipline.** Wherever the active engine supports it (Claude API does), cache reads materially cut TTFT and cost; cache hit rate is tracked as an SLO. Engines without cache support operate within their own latency budget; the abstraction does not paper over engine differences silently.
+
+**Engines are not the substrate.** Vendor-provided "memory" or "agent" features (e.g., Anthropic's memory tool, vendor-side agent SDKs) are acceptable for agent-internal scratchpads where the vendor's ZDR / residency guarantees hold, but they are **not** the AIRIS consciousness substrate. Substrate semantics stay AIRIS-owned via the four contracts in §17.4.
+
+**Supersession note.** Earlier framings of this section named specific engines and hosting as platform commitments (V27 / earlier-V28: "Bedrock EU primary + Mistral La Plateforme EU fallback; Phase D adds local self-hosted on Hetzner GEX44 / OVHcloud L40S"; intermediate V28: "Local Ollama as active backend; Bedrock EU + Mistral La Plateforme EU configured fallback"). All such engine names are retired as platform commitments; they remain as illustrative deployment options under the three modes above. See D.21 and D.22 for the architectural commitment and supersession history.
 
 #### 17.6 Voice stack (Interaction Layer + Agent Builder)
 
@@ -12373,41 +12393,58 @@ Cross-references: D.13 (the pack is Phase A deliverable; pack timeline is one of
 
 **Cross-references:** Part 0 Working Principle 0.3.1; Part IV Production Plan Phase 0 / Phase A operational sections; Section 17 reframe note (Part II); Part VII Section 7.3 (Phase D pre-deployment).
 
-#### D.21 Three-backend LLM abstraction built from Phase A core systems (Step 4.5), not deferred (V28)
+#### D.21 Engine-agnostic LLM substrate abstraction; three deployment modes; built Step 4.5 (V28; reframed strategy session 2026-05-28)
 
-**Decision:** The three-backend LLM abstraction (Section 17.5) — local self-hosted as active backend; Bedrock EU + Mistral La Plateforme EU configured but not active, selectable per case via abstraction — gets built starting Phase A core systems Step 4.5. NOT deferred to Phase D.
+**Decision:** The LLM substrate (Section 17.5) is **engine-agnostic** by construction. AIRIS code calls an LLM through a stable AIRIS-internal interface; concrete engine and deployment mode are per-deployment configuration, not platform commitments. The abstraction supports three deployment modes:
 
-**Rationale:** Without this discipline, local Ollama quality limits become UX compromises in the Real UX Minimal Infrastructure approach (D.20). With it, local stays active backend and API is configured-but-not-default fallback for per-case use where local genuinely insufficient. Protects UX in the minimal-infrastructure approach.
+1. **Client-local self-hosted** — engine runs inside the client's environment.
+2. **Online API** — engine accessed via a vendor API.
+3. **AIRIS-hosted, non-HQ** — engine hosted by AIRIS in a region / account distinct from HQ.
 
-**Alternatives considered:**
-- *Three-backend abstraction Phase D only*: rejected because D.20 minimal-infrastructure approach requires this abstraction as UX protection from Phase A onward.
-- *Use only local LLM without abstraction*: rejected because local 7B-14B Q4 quality may not handle all Italian medical reasoning cases — UX compromise if no fallback.
-- *Use only API LLM without local active*: rejected because conflicts with Italian hospital sovereignty story and D.22 LLM priority flip.
+The abstraction is built starting Phase A core systems Step 4.5 (not deferred). Step 4.3 paradigm prototype runs on the current concrete backend (per D.22) and moves behind the abstraction at Step 4.5 without semantics change.
 
-**Supersession history:** V27 §17.5 + V21 commitment to three-backend abstraction. V28 D.21 makes the operational timing explicit — built Step 4.5, not deferred.
-
-**Cross-references:** Part 0 Working Principles 0.3.1 + 0.3.8; D.20; Section 17.5; Active Plan Stage 4 Step 4.5.
-
-#### D.22 LLM substrate priority flip — local self-hosted as active backend (V28)
-
-**Decision:** V27 D.12 + Section 17.5 framing of LLM substrate is reframed: local self-hosted LLM is the **active backend** (operational default); AWS Bedrock EU + Mistral La Plateforme EU are configured fallback backends in the three-backend abstraction (D.21), selectable per case when local quality insufficient.
-
-V27 framing was: "Bedrock EU primary + Mistral La Plateforme EU fallback; Phase D adds local hospital-resident." V28 framing is: "Local self-hosted active; API backends configured but not active."
-
-**Rationale (founder direction this session):**
-- Italian hospital procurement reality prefers on-prem / self-hosted; AGFA positioning strongest with "AIRIS works fully without API access"
-- Italian incumbent differentiation: Dedalus on Azure, GPI on AWS — AIRIS as "we don't need US hyperscalers for most sensitive operations" differentiates cleanly
-- V27 D.15 EU residency posture stronger with local LLM (eliminates Schrems-II concern for LLM inference entirely)
-- Vendor independence: not locked to Anthropic / AWS / Mistral
-- Open-weights model quality is closing — frontier APIs not strictly necessary for many Italian medical tasks
+**Rationale:**
+- Engine identity is a deployment concern, not an architectural commitment. Clients have heterogeneous requirements (data residency, sovereignty, procurement posture, cost ceilings, latency budgets) that no single engine satisfies.
+- The abstraction protects UX (Working Principle 0.3.1) by making engine choice configuration rather than rewrite.
+- It also protects AIRIS from vendor lock-in and from being defined by any single LLM provider's roadmap.
+- Sister abstraction to D.24: the same way the platform is locale-agnostic with concrete localization per market, the LLM substrate is engine-agnostic with concrete backend per deployment.
 
 **Alternatives considered:**
-- *Keep V27 framing (API primary, local fallback)*: rejected — doesn't match founder strategic position
-- *Pure local (no API fallback)*: rejected — would compromise UX where local quality insufficient (per D.21 discipline)
+- *Commit to one engine platform-wide*: rejected — forecloses deployments whose requirements don't match the chosen engine.
+- *Defer the abstraction to Phase D*: rejected — without the abstraction during Phase A, the current concrete engine becomes load-bearing by accumulation, which is the exact lock-in the abstraction prevents.
+- *Two-mode abstraction (online API + self-hosted only)*: rejected — the AIRIS-hosted-non-HQ mode is a real client posture distinct from both (managed-by-us without third-party vendor API dependency).
 
-**Supersession history:** V27 D.12 (Bedrock EU primary, Mistral EU fallback, Phase D adds local) reframed by V28 D.22 (Local active, Bedrock EU + Mistral EU configured fallback). Architecture unchanged (three-backend abstraction was already committed since V21); only the active default flipped.
+**Supersession history:**
+- V21 framing: three-backend abstraction with specific named engines.
+- V27 §17.5 (D.12): "Bedrock EU primary + Mistral La Plateforme EU fallback; Phase D adds local hospital-resident."
+- V28 D.21 (May 2026): "Three-backend abstraction — local self-hosted active; Bedrock EU + Mistral La Plateforme EU configured but not active; built Step 4.5."
+- **V28 D.21 reframe (strategy session 2026-05-28)** — this entry: engine-agnostic abstraction, three deployment modes (Mode 1 / Mode 2 / Mode 3 above), no specific engine commitments at the platform layer. All prior named engines (Ollama, Hostinger VPS, AWS Bedrock EU, Mistral La Plateforme EU, Hetzner GEX44, OVHcloud L40S) are retired as platform commitments; they remain illustrative deployment options. Current concrete backend lives in D.22.
 
-**Cross-references:** Part 0 Working Principle 0.3.1; D.21; Section 17.5; Active Plan Stage 4 Step 4.3 (paradigm prototype with local LLM active) + Step 4.5 (core systems builds abstraction).
+**Cross-references:** Part 0 Working Principles 0.3.1 + 0.3.8; D.22; D.24 (sister abstraction — international platform / locale-agnostic by construction); Section 17.5; Section 17 reframe note (cross-cutting reframe across all of Section 17); Active Plan Stage 4 Step 4.3 (prototype on current concrete backend) + Step 4.5 (abstraction built here).
+
+#### D.22 Current concrete LLM backend: Claude API direct (V28; reframed strategy session 2026-05-28)
+
+**Decision:** The current concrete LLM backend for AIRIS Phase 0 development and current deployments is **Claude API directly** — an instance of deployment Mode 2 (online API) under the engine-agnostic abstraction (D.21). Specific model selection (Claude family member, version) is tracked operationally in `infra/manifest.md`, not committed at the Master Doc level.
+
+This is a configuration choice, not an architectural commitment. The abstraction (D.21) allows any future deployment to wire a different engine and/or deployment mode without code change.
+
+**Rationale (founder direction, strategy session 2026-05-28):**
+- Claude API has the strongest current capability profile for the workloads AIRIS exercises (clinical-language intent parsing, structured outputs, multi-turn reasoning, code-switched language, tool use, prompt caching).
+- Anthropic's prompt-caching + SLO discipline is mature and well-matched to AIRIS's latency budgets (§17.5).
+- Phase 0 / early Phase A operational philosophy (Working Principle 0.3.1) favours the simplest concrete backend that delivers uncompromised UX; Claude API does, with no operational overhead beyond API key management.
+- Per-deployment posture: the abstraction (D.21) is what carries the strategic options (sovereign self-hosted, AIRIS-hosted, etc.). Concrete backend choice happens per deployment.
+
+**Alternatives considered:**
+- *Commit to a self-hosted open-weights backend as platform default*: rejected — over-commits the platform to one engine identity; conflicts with D.21 engine-agnostic stance.
+- *Commit to a multi-vendor API set (AWS Bedrock EU + Mistral La Plateforme EU + others) as platform default*: rejected — same over-commitment, plus operational complexity that Working Principle 0.3.1 doesn't justify Phase 0.
+- *Pick the engine per workload inside the platform*: rejected — engine routing per workload is a deployment-level optimization, not a platform-level commitment.
+
+**Supersession history:**
+- V27 D.12 framing: "Bedrock EU primary + Mistral La Plateforme EU fallback."
+- V28 D.22 (May 2026): "LLM substrate priority flip — local self-hosted as active backend; Bedrock EU + Mistral EU configured fallback."
+- **V28 D.22 reframe (strategy session 2026-05-28)** — this entry: D.22 no longer names a deployment mode as "active." It names the **current concrete backend** (Claude API direct) as the Phase 0 operational default, with per-deployment selection thereafter governed by D.21. The earlier framings (Bedrock EU primary; then local-active) are retired as platform commitments and become illustrative deployment options under D.21.
+
+**Cross-references:** Part 0 Working Principle 0.3.1; D.21; D.24 (sister abstraction); Section 17.5; Section 17 reframe note; Active Plan Stage 4 Step 4.3 (prototype on Claude API direct) + Step 4.5 (engine-agnostic abstraction built); `infra/manifest.md` (active model + key registration).
 
 #### D.23 SW-first sequencing of pack workstreams (V28)
 
@@ -12428,6 +12465,43 @@ V27 framing was: "Bedrock EU primary + Mistral La Plateforme EU fallback; Phase 
 **Supersession history:** V27 Part IV Section 2.0 + Section 3 + Part V Section 5 Pack Workstream Status had framing about pack workstreams initiating during Phase 0 / "alongside software work." That framing was Claude inference from Stage 1 lead-time analysis, not founder strategic decision. V27 strategic frame holds (D.13 pack-as-Phase-A-deliverable; R.11 pack timeline appropriate). V28 D.23 makes operational sequencing explicit and resolves the inference.
 
 **Cross-references:** Part 0 Working Principle 0.3.2; D.13 (pack is Phase A deliverable); R.11 (pack timeline); Active Plan Stages 4 + 5 + 6 structure.
+
+#### D.24 International platform; locale-agnostic by construction; Italy as first deployment market (V28; strategy session 2026-05-28)
+
+**Decision:** AIRIS is an **international platform**. The platform architecture — the dual-surface paradigm (D.8), the consciousness substrate (§17.4), the eleven-module structure (D.10), the engineering architecture (Part II Section 17), the three Builders, the Patient Flow Layer, the Regulatory Layer pattern — is **locale-agnostic by construction**. The platform commits to no single human language, medical-terminology system, regulatory regime, or national identity framework. Market-specific content lives in a **localization layer** produced per market.
+
+**Italy is the first deployment market.** Italy's localization layer — Italian medical terminology, Italian voice character, FSE 2.0 / SDO / NSIS regulatory artifacts, codice fiscale / FNOMCeO / albo identity composition, NIS2 / HDS posture, Italian-specific MPI handling (STP / ENI / transgender CF transition / pre-CF neonates / "Limbo" pattern), Italian incumbent-landscape competitive positioning — is committed at first-market depth in §17.6, §17.7, §17.8, §17.13, §17.21, §17.22, §17.23, D.18, and D.19. This is the moat for the first market and the basis of the AGFA-Italy beachhead.
+
+Subsequent markets carry their own localization layer. The platform underneath generalizes without architectural change.
+
+**Rationale (founder direction, strategy session 2026-05-28):**
+- Strategic positioning: AIRIS competes globally on the dual-surface paradigm + consciousness substrate; Italy is the first market because of clearest stakes and clearest fit (per Part I Scope), not because AIRIS is "an Italian product."
+- Architectural integrity: the paradigm, substrate, and engineering architecture do not depend on any single locale; making this explicit prevents accidental Italianisms from accreting into the platform layer as load-bearing assumptions.
+- Sister abstraction to D.21: same way the LLM substrate is engine-agnostic with concrete backend per deployment, the platform is locale-agnostic with concrete localization per market.
+- Phase 0 demo language: English platform default. Italy localization remains at first-market depth and is the deployment target for AGFA + Italian launch hospitals.
+
+**What this is not:**
+- *Not a genericising-away of Italian content.* The Italian regulatory anchor union (D.19), Italian clinician identity composition (D.18), Italian voice stack (§17.6), Italian incumbent positioning (§17.21), Italian Regulatory Layer (§17.7), and Italian Patient Flow Layer edges (§17.8) all stay at first-market depth. They are now positioned as Italy's localization, not as platform-wide commitments.
+- *Not a deferral of internationalisation to "later."* The architectural commitment is *now*; per-market localization work happens market by market when each market activates.
+- *Not a translation framework.* Locale-agnostic by construction means the platform takes no position on what the localization layer must contain; each market produces its own.
+
+**Operational consequences:**
+- Platform-layer code, schemas, and contracts use English defaults and locale-aware data shapes where locale matters.
+- Italy-specific concrete tables and components (FSE Schematron artifacts, codice fiscale identity fields, FNOMCeO claims, Italian PDTA state machines, Italian-tuned MPI thresholds) live within clearly-scoped Italian-localization modules of the broader engineering architecture.
+- Step 4.3 paradigm prototype is built in **English** (platform default). Italian-localized paradigm validation is a follow-on milestone aligned with Italian-market readiness (likely Step 4.10 Radiology deep + Italian voice talent Stage 5.2).
+- Master Doc framing throughout updates as drift surfaces, per Working Principle 0.3.7 (Audit Discipline). The Italian-specific content in Section 17 and elsewhere is preserved verbatim; only the framing changes.
+
+**Alternatives considered:**
+- *"Italian-first" with international as Phase B+ deferral*: rejected — that framing makes Italian content load-bearing at the platform layer, which constrains subsequent markets and conflates positioning with architecture.
+- *Strip Italian content to a separate "Italy module"*: rejected — Italy is the first market and its content is committed at first-market depth; sequestering it would lose the moat. Localisation layer is conceptual scaffolding, not a code / doc reorganisation.
+- *Defer this decision until second market activates*: rejected — by then, accumulated Italianisms in the platform layer would be hard to extract. Architectural commitment now is what protects platform generality.
+
+**Supersession history:**
+- V21–V27 framing: "Italian-first by deliberate market choice."
+- V28 (May 2026): same framing inherited (Part 0.2 Stance bullet; Part I Scope paragraph).
+- **V28 D.24 (strategy session 2026-05-28)** — this entry: international platform with Italy as first deployment market. "Italian-first" framing in Part 0.2 and Part I Scope reframed in this atomic commit; Italian-specific content in Section 17 / D.18 / D.19 preserved as Italy's localization.
+
+**Cross-references:** Part 0.2 Stance (Italian-first bullet reframed this commit); Part 0.3.1 + 0.4 (locale-aware intent parsing + locale-agnostic platform commitment); Part I Scope (first-deployment-market paragraph reframed this commit); D.18 (Italian clinician identity composition — Italy localization); D.19 (Italian regulatory anchor union — Italy localization); §17.6 / §17.7 / §17.8 / §17.13 / §17.21–§17.23 (Italian-specific subsystem content preserved as first-market localization); Section 17 reframe note (cross-cutting reframe across all of Section 17); D.21 (sister abstraction — engine-agnostic substrate); Active Plan Stage 4 Step 4.3 (paradigm prototype in English platform default).
 
 
 ---

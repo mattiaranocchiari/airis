@@ -25,34 +25,19 @@ This plan operates under V28 Part 0 Working Principles:
 
 **Active stage:** Stage 4 — SW Build (Phase 0 + Phase A SW completion)
 
-**Active step:** Step 4.1 — Day 1: Minimal infrastructure setup + dev environment + paradigm prototype sketch refinement
+**Active step:** Step 4.3 — Paradigm prototype build (CT scheduling)
 
-**Step 4.1 status:**
-- ✓ CT scheduling paradigm prototype scope drafted (V27/V28 absorbed into V28 framing)
-- ✓ Patient Registry endpoint scope drafted (V27/V28 absorbed into V28 framing)
-- ✓ Supabase MCP + GitHub MCP connectors configured in Claude Desktop App (founder confirmed)
-- ⧖ GitHub account + AIRIS private repo creation (founder action)
-- ⧖ Supabase managed EU free tier project creation (founder action)
-- ⧖ Vercel free tier account + linked to GitHub (founder action)
-- ⧖ Claude Code Pro subscription ($20/mo) (founder action)
-- ⧖ Claude Desktop App for Windows installed (founder action)
-- ⧖ Repository scaffold: Next.js App Router + TypeScript + CLAUDE.md pointing to Master Doc V28 + Active Plan + Project Core (claude + founder collaborative)
-- ⧖ Existing Ollama VPS on Hostinger confirmed accessible (founder confirmed)
+**Step 4.1 status:** ✓ complete (Next.js scaffold + minimal Phase 0 procurement landed across two execution turns, 2026-05-28).
 
-**What's NOT in Step 4.1 procurement** (per D.20 Real UX Minimal Infrastructure):
-- Hetzner GPU server, Hetzner GEX44, Hetzner CX23 — deferred to Phase D pre-deployment per Part VII Section 7.3.1
-- Cloud Run europe-west8 — deferred to Phase A core systems if Python services tier work needs hosted environment beyond Ollama VPS
-- Inngest Pro Frankfurt EU — deferred to Phase A when first cross-Builder workflow needs durable execution at scale; Phase 0 can use inline event emission or Inngest free tier
-- Backblaze B2 EU — deferred to Phase A when cold storage / audit archive backup matters operationally
-- Better Stack + Sentry EU + Grafana Cloud EU — deferred to Phase A when production traffic exists
-- Infisical self-hosted — deferred to Phase A when secrets management beyond Vercel env vars matters
-- Full Hostinger production topology — Phase D pre-deployment per Part VII Section 7.3.1
+**Step 4.2 status:** ✓ complete (Patient Registry endpoint with auth-gating + tenant scoping by construction + CloudEvents envelope + hash-chained L6 audit ledger per D.17 + Italian-claim Custom Access Token Hook stub per D.18; foundation patterns set for Phase A core systems — see STATE.md "Just done" for the full surface).
 
-**Total Phase 0 cost:** ~$20/mo Claude Code Pro + voice API usage when Step 4.3 begins (~$30-80/mo). Setup time: roughly one afternoon.
+**Step 4.3 status:** active. Strategy session 2026-05-28 framed scope, reframed D.21 + D.22, added D.24 (international platform; Italy as first deployment market), drafted `docs/Step_4.3_plan.md` as the execution-turn plan. Execution turn opens against that plan next.
 
-**Next action to take:** Step 4.1 execution. Founder completes minimal procurement (~1 afternoon). When complete, Step 4.2 (Patient Registry endpoint with Claude Code) becomes active.
+**Total Phase 0 cost (revised post-2026-05-28):** ~$20/mo Claude Code Pro + Claude API usage (load-bearing for Phase 0 paradigm prototype + ongoing development; usage-based, no fixed monthly commitment) + ~$30-80/mo voice API usage when Step 4.3 voice surface lands (English STT + ElevenLabs default English TTS).
 
-**Critical commitment carried forward:** Three-backend LLM abstraction (V28 D.21, Section 17.5) gets built from Step 4.5 onward (Phase A core systems), NOT deferred. Protects UX in minimal-infrastructure approach.
+**Critical commitments carried forward:**
+- **Engine-agnostic LLM substrate abstraction** (V28 D.21, Section 17.5) — three deployment modes (client-local self-hosted, online API, AIRIS-hosted non-HQ); built from Step 4.5 onward (Phase A core systems), NOT deferred. Step 4.3 prototype runs on the current concrete backend (Claude API direct per D.22) and moves behind the abstraction at Step 4.5 without semantics change.
+- **International platform; Italy as first deployment market** (V28 D.24) — platform architecture locale-agnostic by construction; Italian content in the Master Doc is Italy's localization layer at first-market depth. Step 4.3 paradigm prototype built in English (platform default); Italian-localized paradigm validation is a follow-on milestone aligned with Italian-market readiness.
 
 ---
 
@@ -98,13 +83,17 @@ Dev environment: Code on Windows PC; `npm run dev` runs locally; deploys via git
 
 ##### Step 4.3 — Paradigm prototype build (CT scheduling)
 
-**Status:** Not started — waiting on Step 4.2 completion.
+**Status:** Active. Strategy session 2026-05-28 framed scope; plan committed at `docs/Step_4.3_plan.md`; execution turn opens against that plan next.
 
-**Scope:** CT scheduling paradigm prototype demonstrating dual-surface real-time sync per V28 D.8 + Section 17.4. Italian intent parsing via local LLM active backend (Ollama VPS); voice surface (ElevenLabs Italian default voices — custom-cloned voice is Stage 5 work); patient context inference via consciousness substrate (six-layer architecture bound by four AIRIS-native contracts per V28 Section 17.4). Paradigm-prototype design details worked out during the step's execution from V28 architectural commitments.
+**Scope (post-2026-05-28 strategy reframe):** Smallest CT-scheduling slice that exercises all four pillars — dual-surface real-time sync per V28 D.8 + §17.4 (Supabase Realtime Broadcast on private channels with RLS); locale-aware intent parsing in **English** (platform default per V28 D.24); voice surface (English STT + ElevenLabs default English TTS — Italian-localized voice character is downstream); patient context inference via consciousness substrate (L1 + L2 + L3 + L5 + L6 in Phase 0 scope; L4 embeddings deferred; four AIRIS-native contracts sketched). Paradigm-prototype design details worked out from V28 architectural commitments — see `docs/Step_4.3_plan.md` for the execution-turn plan.
 
-**LLM backend:** Local self-hosted (Ollama on existing Hostinger VPS) per V28 D.22 — active backend through the three-backend abstraction. Bedrock EU + Mistral La Plateforme EU configured but not active.
+**LLM backend:** **Claude API direct** per V28 D.22 (current concrete backend; an instance of deployment Mode 2 under the engine-agnostic abstraction). Step 4.3 calls the API directly; at Step 4.5 the call site moves behind the engine-agnostic abstraction (per V28 D.21) without semantics change. Earlier framings naming Ollama / Bedrock / Mistral were retired in the 2026-05-28 strategy session reframe of D.21 + D.22.
 
-**Output:** Either confirmation that V28 stack commitment + minimal infrastructure approach holds for paradigm validation, OR Master Doc revision if iteration doesn't converge.
+**Voice transport:** Node-native Phase 0 (no Pipecat). Browser WebRTC → English streaming STT → Next.js → Claude API → ElevenLabs default English TTS → browser audio. §17.6 Pipecat commitment lands at Step 4.14 with the full voice stack; the intent contract is stable across the transport change.
+
+**Language:** **English** (platform default per D.24). Italian-localized paradigm validation is a follow-on milestone aligned with Italian-market readiness (likely Step 4.10 Radiology deep + Italian voice talent Stage 5.2).
+
+**Output:** Either confirmation that the V28 stack commitment + minimal-infrastructure approach holds for paradigm validation, OR Master Doc revision if iteration doesn't converge. Failure-mode triggers set in `docs/Step_4.3_plan.md` before execution.
 
 ##### Step 4.4 — Phase 0 → Phase A transition
 
@@ -270,6 +259,20 @@ Whatever Phase B (Sovereign Migration if Schrems-II triggers fire) / Phase C (Cl
 8. **V27 → V28 atomic commit triggered**: founder direction to rewrite Master Doc + Active Plan + Project Core with current consciousness. V28 produced this session. Active Plan rewritten. Project Core rewritten.
 
 9. **Future-concern note captured (Stage 5 work)**: per-project AIRIS tailoring as business model shape + voice agent / per-project AI runtime cost economics. Both belong to Stage 5 Step 5.3 Business Model + Step 5.6 AGFA-Specific Narrative. Captured in V28 Part VII Section 7.1.
+
+### Session: 2026-05-28 strategy — Step 4.3 framing + D.21 / D.22 reframe + D.24 new (international platform)
+
+**Founder direction this session:**
+
+1. **LLM substrate engine-agnostic reframe** (becomes V28 D.21 + D.22 reframe). D.21 framed engine-agnostic: AIRIS calls an LLM through a stable internal interface; three deployment modes (client-local self-hosted, online API, AIRIS-hosted non-HQ); concrete engine chosen per deployment. D.22 reframed: current concrete backend is **Claude API direct** (an instance of Mode 2); earlier "Ollama as active backend" / "Bedrock EU primary" framings retired as platform commitments. The platform commits to the interface and the three modes, not to any specific engine.
+
+2. **International platform reframe** (becomes V28 D.24). AIRIS is an international platform with Italy as first deployment market. Platform architecture is locale-agnostic by construction; Italian content in Section 17 + D.18 + D.19 is Italy's localization layer at first-market depth. Sister abstraction to D.21 (engine-agnostic substrate). Phase 0 paradigm prototype demo language is **English** (platform default); Italian-localized paradigm validation is a follow-on milestone.
+
+3. **Step 4.3 paradigm prototype scope framed.** Four pillars: dual-surface sync (sub-500 ms perceived budget); English intent parsing on Claude API direct (replaces the obsolete "does local Italian work" risk); consciousness substrate L1 + L2 + L3 + L5 + L6 in scope (L4 deferred); engine call on current concrete backend (Claude API). Minimum-viable slice: one CT room day-grid, ~5 intents + disambiguation path + Tier 3 read-back, two-browser configuration for L2 broadcast + RLS proof. Voice transport: Node-native Phase 0, no Pipecat. eGFR check mocked Phase 0. Founder drafts the English intent corpus; Claude reviews + augments. Failure-mode triggers set in the plan before execution.
+
+4. **Step 4.3 execution plan committed** at `docs/Step_4.3_plan.md` (same shape as the Step 4.2 plan that worked). STATE.md links to it; baton flips to execution at strategy-turn close.
+
+5. **Cross-doc updates this commit:** AIRIS Master Doc Part 0.2 + 0.3.1 + 0.4 + Part I Scope + Section 17 reframe note + §17.5 + D.21 + D.22 + new D.24; this Active Plan (CURRENT STATE + Step 4.3 description + this session-log entry); CLAUDE.md (header + Phase 0 stack + Hard invariants); Project_Core.md (AIRIS one-liner); infra/manifest.md (LLM backend section). Italian-specific content in §17.6 / §17.7 / §17.8 / §17.13 / §17.21–§17.23 / D.18 / D.19 preserved verbatim — only the framing changes, per founder direction "localisation-layer reframe, not a genericising-away of the Italian specificity."
 
 ---
 

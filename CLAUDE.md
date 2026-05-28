@@ -1,9 +1,9 @@
 # AIRIS — Operating Manual
 
-Italian hospital information system; first application of the Viva mode pattern.
-**Stage:** 4 (SW Build) — **Step:** 4.1 (minimal infrastructure setup).
+International hospital information system; Italy as first deployment market (V28 D.24); first application of the Viva mode pattern.
+**Stage:** 4 (SW Build) — **Step:** 4.2 done → 4.3 (paradigm prototype — CT scheduling).
 
-**Phase 0 stack:** GitHub (`mattiaranocchiari/airis`); Supabase managed EU free tier (`eu-west-3`, project `airis`); Vercel free, GitHub-linked; Anthropic API as active LLM backend. Three-backend LLM abstraction built from Step 4.5 per V28 D.21.
+**Phase 0 stack:** GitHub (`mattiaranocchiari/airis`); Supabase managed EU free tier (`eu-west-3`, project `airis`); Vercel free, GitHub-linked; **Claude API direct** as the current concrete LLM backend per V28 D.22. Engine-agnostic LLM substrate abstraction (three deployment modes — client-local self-hosted, online API, AIRIS-hosted non-HQ) built from Step 4.5 per V28 D.21.
 
 **Operating principles:** *Real UX, Minimal Infrastructure* (V28 D.20). *Branch consciousness* — each node knows itself + parent + children only.
 
@@ -70,7 +70,8 @@ The git repo is the only state shared between the strategic (Claude.ai chat) and
 
 - **Never commit secrets.** Names only in `/infra/manifest.md`; values live in Vercel/Supabase env.
 - **Tenant scoping by construction**, not by application-layer filtering (RLS / schema-per-tenant; see V28).
-- **Three-backend LLM abstraction** from Step 4.5 per V28 D.21. Phase 0 active backend: Anthropic API.
+- **Engine-agnostic LLM substrate abstraction** from Step 4.5 per V28 D.21 (three deployment modes: client-local self-hosted, online API, AIRIS-hosted non-HQ). Current concrete backend per V28 D.22: Claude API direct.
+- **International platform; Italy as first deployment market** per V28 D.24. Platform architecture (paradigm, substrate, engineering architecture) is language- and locale-agnostic by construction; Italian content in the Master Doc is Italy's localization layer, not a platform-wide commitment.
 - **Docs win over chat memory.** When strategic-chat working memory disagrees with committed docs, the docs are truth.
 - **Plans cross sessions as files, not plan-mode artifacts.** `/docs/AIRIS_Active_Plan.md` + `/STATE.md` are the carriers. Plan mode is in-session scratch only.
 - **Flush state before session end.** Auto-compaction can drop early conversation; only what is committed survives.

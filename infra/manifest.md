@@ -54,8 +54,9 @@ Update on every change to deployed infrastructure or environment configuration.
 
 ## LLM backend (Phase 0)
 
-- **Active backend:** Anthropic API
-- **Abstraction layer:** to be built from Step 4.5 per V28 `D.21` (three-backend abstraction). Step 4.3 paradigm prototype flips the *active* default to local self-hosted (Ollama VPS) per D.22 while keeping the abstraction unchanged.
+- **Current concrete backend:** Claude API direct (per V28 D.22). An instance of deployment Mode 2 (online API) under the engine-agnostic abstraction.
+- **Abstraction layer:** engine-agnostic LLM substrate (per V28 D.21) — three deployment modes (client-local self-hosted, online API, AIRIS-hosted non-HQ). Abstraction built from Step 4.5; Step 4.3 paradigm prototype calls Claude API directly and moves behind the abstraction at Step 4.5 without semantics change. Earlier framings (Ollama VPS / Bedrock EU / Mistral La Plateforme EU) retired as platform commitments per the 2026-05-28 strategy session reframe; see Master Doc D.21 + D.22 supersession history.
+- **Model + version:** record the active Claude model name + version in this manifest as deployments configure them. Phase 0 dev uses the model identifier set in `ANTHROPIC_API_KEY`'s associated workspace; no specific version pinned in this Master Doc.
 
 ## Secret names (values NOT in repo)
 

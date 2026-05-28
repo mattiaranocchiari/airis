@@ -1,39 +1,37 @@
-**BATON:** strategy
-**Stage / Step:** 4 / 4.2→4.3
-**Updated:** 2026-05-28 by execution (Claude Code) @ this commit
+**BATON:** execution
+**Stage / Step:** 4 / 4.3
+**Updated:** 2026-05-28 by strategy (Claude Code acting as strategy channel) @ this commit
 
 ---
 
 ## Just done
 
-This execution turn (branch `claude/charming-archimedes-iL8k3` → PR #2 → squash-merge to `main`):
+Strategy turn (branch `claude/loving-knuth-H2bSz` → draft PR — direct-to-`main` via founder merge per project ritual):
 
-- **Operating-rule encoding in `CLAUDE.md`** — both rules activated this session, encoded verbatim:
-  - **Execution self-merges routine PRs.** All CI checks green, squash-merge into `main`, delete the source branch. Architectural decisions surface to strategy *before* the merge.
-  - **Baton continuation.** Consecutive routine execution work keeps the baton at execution; flip to strategy only for architectural decisions, blocking questions, or plan milestones.
-- **Step 4.2 — Patient Registry endpoint** complete. Strategy-channel plan review accepted in this turn; built without architectural deltas. Surface:
-  - 17 Supabase migrations under `supabase/migrations/` (applied via Supabase MCP); dev project schema now: `tenants`, `clinician_profiles`, `patients`, `audit_events` (hash-chained per D.17, ordered by per-tenant `chain_sequence`), `event_queue` (CloudEvents v1.0.2 outbox per §17.9). RLS enforces tenant scoping on every table; soft-delete filter is application-side (PG RLS soft-delete trap — see migration 0015 + `notes.md`). `audit_events_append` lives in a private `airis_internal` schema (not exposed via PostgREST).
-  - Italian-claim Custom Access Token Hook stub per D.18 + §17.13 (`public.custom_access_token_hook`); projects 9 Italian-identity fields from `clinician_profiles` into JWT `app_metadata` on every token issuance. Manual one-time registration in Supabase Dashboard required (see `infra/manifest.md`).
-  - Atomic `patient_create / patient_update / patient_delete` RPCs combining the patients-row mutation, CloudEvents envelope insert into `event_queue`, and audit-chain append in one transaction.
-  - Node code: `lib/cloudevents.ts` envelope builder + Zod-validated event registry under `events/core/`, `lib/finalita.ts` (closed enum + `X-AIRIS-Finalita` header parser), `lib/db/patients.ts` data-access layer (single audited path per founder steer — no triggers), `lib/supabase/server.ts` Next.js server client.
-  - App Router routes: `app/api/patients` (GET list + POST) and `app/api/patients/[id]` (GET + PATCH + DELETE). Auth-gated, tenant-scoped via JWT app_metadata, finalità required on every mutation.
-  - Vitest installed; `tests/patients.roundtrip.test.ts` exercises create→update→delete + chain linkage + RLS isolation across tenants + soft-delete default filter. End-to-end SQL smoke test (via Supabase MCP) verified chain integrity (3 appends in one transaction, no chain fork). Vitest runs locally when `.env.local` carries the project URL, publishable key, and service-role key (see `infra/manifest.md`).
-  - Build + lint + typecheck all clean (`npm run build`, `npm run lint`, `npx tsc --noEmit`).
-- **`infra/manifest.md` updated**: migration level 0 → 17; schema state listed; new deps (`@supabase/supabase-js`, `@supabase/ssr`, `zod`, `ulid`, `vitest`, `dotenv`); new secret name `SUPABASE_SERVICE_ROLE_KEY`; Custom Access Token Hook registration step recorded.
+- **Step 4.3 framed** as a paradigm-validation prototype (not a Radiology subsystem build) — four pillars: dual-surface sync, English intent parsing on Claude API direct, consciousness substrate L1+L2+L3+L5+L6, engine call on the current concrete backend. Smallest paradigm-validating CT-scheduling slice committed in `docs/Step_4.3_plan.md` (~5 intents + disambiguation + Tier 3 read-back; two-browser preferred for L2 broadcast + RLS proof).
+- **Two architectural reframes** absorbed into the Master Doc this session — both supersede prior framings without disturbing the substantive Italian / Section 17 content:
+  - **D.21 reframed** — engine-agnostic LLM substrate abstraction; three deployment modes (client-local self-hosted; online API; AIRIS-hosted non-HQ); built Step 4.5. Earlier named engines (Ollama, Hostinger VPS, AWS Bedrock EU, Mistral La Plateforme EU, Hetzner GEX44, OVHcloud L40S) retired as platform commitments; they remain illustrative deployment options.
+  - **D.22 reframed** — current concrete LLM backend is **Claude API direct** (an instance of Mode 2). No deployment-mode-as-platform-default; concrete backend per deployment under D.21.
+  - **D.24 new** — international platform; Italy as first deployment market; locale-agnostic by construction; Italian content in §17.6 / §17.7 / §17.8 / §17.13 / §17.21–§17.23 / D.18 / D.19 preserved as Italy's localization layer at first-market depth, not as platform-wide commitments. Sister abstraction to D.21.
+- **Master Doc surgical edits** this commit: Part 0.2 Stance (Italian-first bullet reframed to international + Italy first-market); Part 0.3.1 (locale-aware intent parsing; engine-agnostic discipline); Part 0.4 (procurement + abstraction bullets + new D.24 bullet); Part I Executive Vision Scope (international platform paragraph); Section 17 reframe note (cross-cutting reframes for engine-agnostic + international platform); §17.5 (full rewrite around engine-agnostic + three modes + current backend); D.21 (reframed in place with supersession history); D.22 (reframed in place with supersession history); D.24 (new entry). Italian-specific content in Section 17 / D.18 / D.19 / §8.6 preserved verbatim — only the framing changes.
+- **Active Plan updated**: CURRENT STATE block (Step 4.3 active; Step 4.1 + 4.2 marked complete; revised Phase 0 cost line with Claude API usage); Step 4.3 scope (Ollama framing dropped; English platform default; Node-native voice; Claude API direct; references the new plan file); new session-log entry at the bottom recording the four founder directions + cross-doc updates.
+- **CLAUDE.md updated**: header reframed to "international hospital information system; Italy as first deployment market"; Phase 0 stack line carries Claude API direct + engine-agnostic abstraction framing; Hard invariants block carries D.21 + D.24 entries.
+- **Project_Core.md updated**: AIRIS one-liner now reads "hospital information system; international platform, Italy as first deployment market."
+- **infra/manifest.md updated**: LLM backend section reframed to "current concrete backend: Claude API direct" (an instance of Mode 2 under the engine-agnostic abstraction); the obsolete Ollama-VPS-flip-at-Step-4.3 note removed.
+- **`docs/Step_4.3_plan.md` committed** — execution-turn plan, same shape as the Step 4.2 plan that worked: scope, four pillars, minimum-viable slice, architectural commitments, schema additions, failure-mode triggers set before execution, corpus generation plan, acceptance criteria, open questions, the four steers from this strategy session.
 - **`docs/decision-log.md` entry** appended for this turn.
-- **`notes.md` created** at repo root — Step 4.2 Claude Code experience observations + operational notes (Active Plan deliverable).
 
 ## In flight / uncommitted
-- None on the branch after the PR squash-merge.
 
-## Next concrete step (strategy turn)
+- None on the branch beyond what's listed above; awaiting founder merge of this strategy commit into `main`. Once merged, execution opens a new branch from `main` to build against `docs/Step_4.3_plan.md`.
 
-**Step 4.3 — Paradigm prototype (CT scheduling)** per `docs/AIRIS_Active_Plan.md`. Architecturally substantive: voice stack (Pipecat + Italian STT/TTS per §17.6), dual-surface real-time sync per §17.4, **local self-hosted LLM as active backend** per D.22 (Ollama VPS), and the consciousness substrate six-layer composition per §17.4. Strategy turn frames the prototype scope + LLM backend wiring + Italian intent corpus before execution kicks off.
+## Next concrete step (execution turn)
 
-Phase 0 active LLM backend remains **Anthropic API** per `infra/manifest.md` until D.22's local-active flip is operationally wired in Step 4.3 (Ollama VPS).
+**Step 4.3 — Paradigm prototype (CT scheduling)** per `docs/Step_4.3_plan.md`. Execution turn opens against that plan. First sub-deliverable likely: appointment schema + atomic RPCs + Realtime broadcast wiring + scheduler grid view + Claude API intent-parse path for the first two intent classes (Tier 1 view + Tier 2 schedule). Two-browser configuration brought up early to validate the L2 broadcast + RLS contract before the rest of the intents land. Founder drafts the English intent corpus alongside execution.
 
-## Open questions for the other channel
+## Open questions for the other channel (execution)
 
-- **CATH registration timing.** The Custom Access Token Hook function is defined in the DB but must be registered in the Supabase Dashboard for it to fire on auth events. Phase 0 dev: register now (manual click) so tests covering the Italian claims work end-to-end? Or defer to Step 4.5 when the hook composes real ABAC state? Lean: register now — the stub is well-bounded, and the round-trip test in this PR doesn't depend on the hook (test JWTs are constructed by Supabase Auth without exercising the hook unless registered). Founder call.
-- **`finalità` enum reconciliation with FSE 2.0.** Recorded as a Step 4.13 task; no Phase 0 action.
-- **G2 trigger.** When should we move tests off the live `airis` Supabase project (G1) to Supabase local CLI or a Pro-tier preview branch (G2)? Active trigger from the plan: "before any real or sensitive data exists in the project." Phase 0 has none; revisit at Step 4.4 transition.
+- **Two-browser cost.** Founder lean is two-browser if cheap to wire up the second session against the existing auth-hook + RLS pattern. If execution discovers it's non-trivial (e.g., would require a second Supabase project, or the RLS policy on `realtime.messages` needs new work), single-user first is acceptable — surface to strategy and bring two-browser online later in the same step.
+- **English STT pick.** Plan says one English streaming STT; execution picks between Deepgram English and AssemblyAI English (or equivalent) based on a quick latency check at execution time. Either is fine; no strategic preference from this session.
+- **G2 trigger reminder.** Step 4.2 follow-up flagged "before any real or sensitive data exists." Step 4.3 adds only synthetic English patients + synthetic CT slots; reusing the existing `airis` dev Supabase project is fine. Re-evaluate at Step 4.4 transition.
+- **CATH registration carry-forward.** The Custom Access Token Hook from Step 4.2 (`public.custom_access_token_hook`) is still defined in the DB but not yet registered in the Supabase Dashboard. Step 4.3 doesn't strictly depend on it (synthetic English patients don't need Italian claims). Register it when the localised Italian milestone arrives.
