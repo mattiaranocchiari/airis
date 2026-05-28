@@ -32,6 +32,7 @@ The git repo is the only state shared between the strategic (Claude.ai chat) and
 - Two channels: **strategy** (Claude.ai chat) and **execution** (Claude Code).
 - Coordination via the **baton** in `/STATE.md` — single home, on `main`.
 - One channel acts per turn. At most one open code branch at a time.
+- **Baton continuation.** Consecutive routine execution work keeps the baton at execution — do not flip to strategy after every merge just to be handed back. Flip to strategy only when (a) an architectural decision is required, (b) a blocking question needs strategy input, or (c) a plan milestone is reached (stage boundary, V28→V29-class commit, etc.).
 
 ---
 
@@ -60,7 +61,8 @@ The git repo is the only state shared between the strategic (Claude.ai chat) and
 - **Code (execution)** = feature branches (one open at a time) → PR → squash-merge to `main`. PR is the MDR Class IIb audit record.
 - **Docs (strategy)** = direct commit to `main`. (Promote to PR-per-change later if auditors require it.)
 - Rebase feature branches on `main` before merge.
-- The merge atomically lands code + STATE update + baton flip. Nothing is "real" until on `main`.
+- **Execution self-merges routine PRs.** Required: all CI checks green (no failing or pending blockers), squash-merge into `main`, delete the source branch. Architectural decisions surface to strategy *before* the merge — do not self-merge a PR that encodes a new architectural commitment.
+- The merge atomically lands code + STATE update + baton flip (if any per the continuation rule). Nothing is "real" until on `main`.
 
 ---
 
