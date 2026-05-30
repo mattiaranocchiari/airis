@@ -1,53 +1,45 @@
-**Active stage / step:** 4 / 4.5 (Core systems build) — Turn 1 code-side lifts complete.
+**Active stage / step:** 4 / 4.5 (Core systems build) — Turn 2 opened (infra activation).
 **Operating model:** single Claude Code session per V28 D.25 — the canonical docs are the entire memory; see `/CLAUDE.md`.
-**Active branch:** `claude/sweet-euler-E6CxR` → PR pending after this commit.
-**Status:** Step 4.5 Turn 1 sub-deliverables **B** (audit ledger emitter library, D.17 + §17.9) + **G partial** (migration-level change-control gate + CHANGELOG generation, §17.19 + §17.20) landed on top of A (LLM substrate lift, merged as PR #6). The Turn 1 pure-code lifts (A + B + G-partial) are now done. Remainder of Step 4.5 is founder-steering-gated (C dashboard op; Turn 2 D+E+F SaaS activation; G-heavy branch protection). Self-merge on greens per V28 D.25 branch model.
+**Active branch:** `claude/step-4.5-turn2-kickoff` → PR pending after this commit.
+**Status:** Turn 1 complete on `main` (`0b095cf`): A LLM substrate lift (#6) + B audit emitter library + G-partial change control (#7). Founder steer 2026-05-30: **activate all of Turn 2** (Inngest + Upstash + observability), **remote-guide CATH now**, **draft the PR template**. This branch lands the Turn 2 kickoff scaffolding (PR template + Turn 2 execution plan + pre-registered secret names). The D/E/F code branches are gated on Mattia creating the (free-tier, EU) accounts + providing secrets. Self-merge on greens per V28 D.25.
 **Updated:** 2026-05-30 by Claude Code @ this commit.
 
 ---
 
 ## Just done
 
-This session, on `claude/sweet-euler-E6CxR` from `main` HEAD `d777b98` (post Step 4.5 Turn 1A merge):
+This branch, from `main` HEAD `0b095cf`:
 
-- **Sub-deliverable B — audit ledger emitter library (D.17 + §17.9).** New `lib/audit/emitter.ts`:
-  - `emitAuditEvent(db, opts)` — the single Node-side audited path: build the CloudEvents v1.0.2 envelope → dispatch the atomic RPC → DB function writes row + `event_queue` outbox + hash-chained L6 audit row in one transaction.
-  - Canonical home for `MutationContext` (`actor` + `finalita` + `tenantId`); `AuditedRpc` type derives the audited mutation RPCs from the Supabase Functions types (read-only `current_tenant_id` + `custom_access_token_hook` excluded by construction); `DomainArgs<R>` = the RPC args minus the audit tail.
-  - `lib/db/patients.ts` + `lib/db/appointments.ts` refactored to delegate (public signatures + return shapes unchanged — `createPatient`/`createAppointment` still generate the entity id locally, so the emitter only returns the universal `{ audit_event_id, event_id }`). Duplicated build-event/dispatch/parse blocks removed; chain ordering stays in `airis_internal.audit_events_append`.
-- **Sub-deliverable G partial — change-control scaffolding (§17.19 + §17.20).**
-  - `scripts/lib/migrations.ts` (pure `checkMigrationSequence`) + `scripts/check-migrations.ts` (CI/dev runner) — verifies `supabase/migrations` is a gap-free, duplicate-free, well-formed sequence (one global 6-digit counter under the `YYYYMMDD` prefix; level == count). `npm run check:migrations`; added as a CI gate.
-  - `scripts/gen-changelog.ts` (`npm run changelog`) — regenerates `CHANGELOG.md` from squash-merged PR titles on `main` (`Title (#N)`). `CHANGELOG.md` seeded with the 6 merged PRs. Derived artifact, not hand-edited; not a pre-merge gate by design (a PR's own entry only exists post-merge).
-  - `tests/migrations.check.test.ts` — 8 unit cases incl. a regression check against the repo's real 23-migration set.
-- **All five greens hold:** `npm run build`, `npm run lint`, `npm run typecheck`, `npm run test` (20 passed / 7 env-gated skipped), `INTENT_EVAL_MOCK=1 npm run eval:intents` (harness wiring verified). `npm run check:migrations` → 23 migrations, level 23.
-- **`infra/manifest.md` updated:** audited-mutations bullet (emitter); migration-level enforcement note; change-control bullet (check:migrations + changelog + deferred G-heavy); scripts + CI lines.
+- **G heavy (code half) — PR template.** `.github/pull_request_template.md`: MDR Class IIb change-control fields (summary, step ref, migration-level delta, D.x impact, verification greens, self-merge eligibility per the V28 D.25 branch model).
+- **Turn 2 execution plan.** `docs/Step_4.5_Turn2_plan.md`: the onboarding checklist (which accounts Mattia creates + which secrets to provide), C/D/E/F sub-steps with design nuances (esp. the E sync→async cache-API decision), sequencing (E→D→F once secrets land), failure-mode triggers, acceptance criteria, and the CATH + branch-protection operator steps.
+- **`infra/manifest.md`.** Pre-registered the Turn 2 managed-infra accounts + secret names (names only): `INNGEST_EVENT_KEY` / `INNGEST_SIGNING_KEY`, `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN`, `SENTRY_DSN` / `SENTRY_AUTH_TOKEN`, `GRAFANA_OTLP_ENDPOINT` / `GRAFANA_OTLP_TOKEN`, plus selectors `AIRIS_EVENTS_BACKEND` / `AIRIS_CACHE_BACKEND`. CATH-pending + branch-protection notes added.
+
+Greens unaffected (docs + template + manifest only; no runtime code). CI runs build/lint/typecheck/check:migrations/test/eval:intents.
 
 ## In flight / uncommitted
 
-- This commit closes Step 4.5 Turn 1's code-side lifts. After it lands, PR self-merges per V28 D.25 branch model (greens green; no failure-mode trigger fired; B operationalises D.17 + §17.9, G-partial operationalises §17.19 + §17.20 — all pre-existing V28 commitments, no new architectural call).
+- This commit lands the kickoff scaffolding. Routine (no runtime code, no new architectural commitment) → self-merges per V28 D.25 on greens.
 
 ## Next concrete step
 
-The Step 4.5 pure-code lifts (A + B + G-partial) are done. Everything remaining is founder-steering-gated — surface to Mattia before opening (see Open questions):
+**Mattia (in parallel, the critical path):**
+1. **CATH (C)** — Supabase Dashboard → Authentication → Hooks → "Customize Access Token (JWT) Claims" → select `public.custom_access_token_hook` → Save; sign in as a demo clinician; we verify the JWT `app_metadata` carries profile-projected claims (`scope_version`, `consent_version`, `specializzazione`, …). Non-breaking (claims mirror the baked values).
+2. **Create accounts** per `docs/Step_4.5_Turn2_plan.md` onboarding checklist (Inngest Cloud EU, Upstash Redis EU, Sentry EU, Grafana Cloud EU) and add the secrets to Vercel (prod + preview) + local `.env.local`.
 
-1. **C — Italian clinician identity CATH registration (D.18 + §17.13).** Needs the Supabase dashboard (Auth → Hooks → "Customize Access Token (JWT) Claims") or the Supabase Management API. Code + `clinician_profiles` rows already in place (Phase 0 mirror); the lift is turning the hook on + verifying the JWT claim shape. Remote-guided when Mattia is around.
-2. **Turn 2 — D Inngest + E Upstash Redis + F observability (Grafana/Sentry).** Each activates a new SaaS account with ongoing cost; needs explicit Mattia direction before opening. Plan + sequencing in `docs/Step_4.5_plan.md`.
-3. **G heavy — branch protection + PR-template enforcement + changelog post-merge auto-commit.** Repo-settings + CI-write-back; needs Mattia's MDR-scaffolding-shape direction.
+**Claude (once secrets land):** open the D/E/F code branches — one at a time per V28 D.25 — in order **E (Upstash L3) → D (Inngest fan-out) → F (Sentry + Grafana)**, each abstraction-first with a default backend that keeps tests green without the live account. Then the Turn 2 end-to-end smoke + `docs/Step_4.5_notes.md` + `docs/Step_4.6_plan.md` stub (Step 4.5 close per the plan acceptance).
 
-When Step 4.5 fully closes, write `docs/Step_4.5_notes.md` (mirrors the 4.2/4.3/4.4 notes pattern) + `docs/Step_4.6_plan.md` stub, per the Step 4.5 plan acceptance criteria.
+Code can also be written *ahead* of secrets with graceful degradation (Phase 0 path when env absent), so the branches don't strictly block on the accounts — but landing each against its live service is the cleaner validation.
 
 ## Open questions for Mattia (founder steering)
 
-Step 4.5 sequencing choices (working answers in `docs/Step_4.5_plan.md`); these gate the remaining sub-deliverables:
+Mostly resolved this session (Turn 2 = activate all; CATH = remote-guide now; G-heavy PR template = drafted). Remaining:
 
-- **Inngest activation (D)** — activate Inngest Cloud EU (free tier) now vs. defer to first subsystem needing durable execution.
-- **Upstash Redis activation (E)** — activate alongside Inngest (cost shared) vs. continue in-process L3 until cross-process need surfaces.
-- **Observability activation (F)** — activate Grafana Cloud EU + Sentry EU now vs. defer to first production-traffic moment.
-- **CATH registration (C)** — remote-guided via the Supabase dashboard when Mattia is around, or via the Supabase Management API if preferable.
-- **MDR Class IIb scaffolding scope (G heavy)** — minimum branch-protection + PR-template shape Mattia's MDR audit will accept; whether to wire changelog post-merge auto-commit (pairs with branch protection).
-- **Infisical activation (H)** — working answer: defer until secret sprawl is real; surface if Mattia wants it now.
+- **E (Upstash) API shape** — working answer: make the L3 cache API async (option 1 in the Turn 2 plan) vs. write-through sync mirror (option 2). Confirm at execution.
+- **Branch protection (G heavy, repo settings)** — Mattia enables the required `build-lint-typecheck-test` check on `main` when ready (PR template already in repo).
+- **Infisical (H)** — working answer: defer until secret sprawl is real (Turn 2 adds ~8 secret names — revisit if that crosses Mattia's threshold).
 
 Carry-forwards from Step 4.3 still open:
 
-- **Voice stack (Step 4.14).** Browser-native Web Speech held for Phase 0; Deepgram / AssemblyAI / ElevenLabs choice surfaces at Step 4.14 or earlier if Mattia wants paid voice sooner.
+- **Voice stack (Step 4.14).** Browser-native Web Speech held for Phase 0; paid voice (Deepgram / AssemblyAI / ElevenLabs) surfaces at Step 4.14 or earlier if Mattia wants it sooner.
 - **eGFR threshold + real-lab integration (Step 4.10).** Phase 0 mock used 60 mL/min/1.73m²; real clinical guidance lands at Step 4.10 Radiology deep.
-- **Synthetic Step 4.3 demo data in dev Supabase.** Wipe when convenient to keep the dev project clean.
+- **Synthetic Step 4.3 demo data in dev Supabase.** Wipe when convenient.
