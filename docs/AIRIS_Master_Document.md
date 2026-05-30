@@ -12503,6 +12503,49 @@ Subsequent markets carry their own localization layer. The platform underneath g
 
 **Cross-references:** Part 0.2 Stance (Italian-first bullet reframed this commit); Part 0.3.1 + 0.4 (locale-aware intent parsing + locale-agnostic platform commitment); Part I Scope (first-deployment-market paragraph reframed this commit); D.18 (Italian clinician identity composition — Italy localization); D.19 (Italian regulatory anchor union — Italy localization); §17.6 / §17.7 / §17.8 / §17.13 / §17.21–§17.23 (Italian-specific subsystem content preserved as first-market localization); Section 17 reframe note (cross-cutting reframe across all of Section 17); D.21 (sister abstraction — engine-agnostic substrate); Active Plan Stage 4 Step 4.3 (paradigm prototype in English platform default).
 
+#### D.25 Single-session integrated operator (V28; founder direction 2026-05-28)
+
+**Decision:** AIRIS is operated by **one Claude Code session at a time** that is the project's complete operator — strategy, execution, architecture, and review all happen within that session. The two-channel strategy/execution baton model (V28-and-earlier: strategy in Claude.ai chat, execution in Claude Code, coordination via a baton in `/STATE.md`) is retired. The session is ephemeral; the canonical docs structure (`CLAUDE.md` + `STATE.md` + `Project_Core.md` + `AIRIS_Active_Plan.md` + `AIRIS_Master_Document.md` + step-specific plans/notes + `infra/manifest.md` + `decision-log.md` + VIVA / Viva Mode Master Documents) is the entire memory across sessions.
+
+**Context-agnostic machine property:** any fresh Claude Code session, given access to the repo at `main` HEAD and the session-start ritual of reading the canonical docs in the prescribed order, can pick up the work where the prior session left off — without relying on any chat-history or prior-session memory. This is the load-bearing property the architecture commits to.
+
+**Rationale (founder direction, 2026-05-28):**
+- *Relay overhead grew with project scale.* Two channels required Mattia to manually re-feed `main` HEAD docs into Claude.ai chat verbatim at every strategy turn (to mitigate strategic-channel staleness per the V28-and-earlier `CLAUDE.md` "verbatim relay" rule). At Phase 0 + Stage 4 scale the relay cost grew per turn.
+- *Strategic-channel working-memory staleness was a recurring fault.* Chat working memory compacts; relevant Master Doc spans + recent `D.x` entries + Active Plan CURRENT STATE + STATE.md had to be re-grounded every strategy turn. The single-session model removes the compaction surface by reading the docs each time directly.
+- *The docs structure had already become rich enough to carry all the state the strategy channel previously held.* `D.x` Decision Log (V27 + V28 entries), Section 17 (engineering architecture; 24 sub-sections), Active Plan (CURRENT STATE + stage/step structure + session-log entries), STATE.md (just-done / in-flight / next-step), step-specific plans + notes — together they make the project state observable from `main` alone.
+- *Founder authority compresses cleanly.* Mattia retains direction-setting in-session; the call surface (qualitative SLOs, market positioning, taste calls, cost limits, time pressure, risk appetite) is the same as before — only the channel through which it's exercised changes.
+
+**Operating model under D.25:**
+- *Single operator.* Claude Code makes architectural calls when they follow existing commitments (the `D.x` log, Section 17, working principles, hard invariants). Surfaces inline to Mattia when a call sets a new commitment, supersedes a `D.x`, changes scope, or has founder-judgment-dependent tradeoffs.
+- *Session-end flush is existential.* Before the session terminates: update `STATE.md`; append `decision-log.md`; promote any architectural commitment into the `D.x` log on the next atomic doc commit; update `infra/manifest.md` if non-git state changed; commit + push. Anything not on `main` does not survive.
+- *Session-start ritual is reading.* CLAUDE.md → STATE.md → Project_Core.md → AIRIS_Active_Plan.md (CURRENT STATE + active step) → AIRIS_Master_Document.md (recent `D.x` + relevant sections) → infra/manifest.md → step-specific plan/notes if any. VIVA / Viva Mode Masters only when the session touches the paradigm foundations.
+- *Branch model unchanged in shape.* One feature branch at a time; PR + squash-merge to `main`; self-merge of routine PRs allowed on greens; architectural-commitment merges surface inline to Mattia first.
+
+**What this is not:**
+- *Not a retirement of founder steering.* Mattia remains authoritative on strategic and qualitative calls. The retirement is of the separate strategy *channel*, not the strategy *role*.
+- *Not a retirement of architectural decision rigor.* The `D.x` log + decision-log + atomic-doc-commit discipline is preserved verbatim. Architectural commitments still get rationale + alternatives + supersession + cross-refs recorded.
+- *Not a retirement of the hard invariants from V28-and-earlier.* RLS-scoped tenant isolation, engine-agnostic LLM substrate, international platform, docs-win-over-chat, plans-cross-sessions-as-files, verbatim grounding (now self-applied within the session) all survive.
+- *Not a parallel-session-allowed model.* One operator at a time; coordinating multiple concurrent Claude Code sessions on the same project is not part of D.25.
+
+**Alternatives considered:**
+- *Continue the two-channel baton (V28 baseline).* Rejected per the rationale above — relay overhead, strategic-channel staleness, and the maturation of the docs structure together made the channel split a net cost.
+- *Move strategy into the docs entirely and execute mechanically.* Rejected — strategy isn't purely textual; founder judgment on qualitative triggers, market positioning, and taste calls remains a live operator-input. The single-session model preserves that input as in-session steering, not as docs-only.
+- *Multiple parallel Claude Code sessions with file-locking on the active branch.* Rejected — adds coordination overhead with no project-scale justification at Phase 0; revisit if Stage 4 work fans out into independently parallel streams.
+
+**Supersession history:**
+- V28 (May 2026, earlier in same month): two-channel strategy/execution baton; coordination via `STATE.md` BATON field; "verbatim relay" rule for Mattia moving `main` HEAD context into Claude.ai chat at strategy turns; "execution self-merges routine PRs" + "architectural decisions surface to strategy *before* the merge" rules in `CLAUDE.md`.
+- **V28 D.25 (founder direction 2026-05-28)** — this entry: single-session integrated operator. CLAUDE.md "Channels and baton" section retired and replaced with "Operating model"; STATE.md BATON header replaced with operator-and-status header; `decision-log.md` entry format drops the "channel" field; "Open questions for the other channel" reframes to "Open questions for Mattia."
+
+**Operational consequences:**
+- *CLAUDE.md* reframed in this atomic commit: "Channels and baton" → "Operating model"; "Rituals" rewritten for single-session start/mid/end; "Branch model" updated; "Hard invariants" adds the D.25 entry; "Compact instructions" updated.
+- *STATE.md* reframed: BATON header → Active-stage/step + Operating-model + Active-branch + Status; "Open questions for the other channel (strategy)" → "Open questions for Mattia (founder steering)."
+- *Project_Core.md* already aligned ("work on the project can resume in any environment / chat / AI tool seamlessly" — that line is the exact context-agnostic-machine property D.25 commits to); no edit needed.
+- *Active Plan* historical session-log entries that reference "strategy session 2026-05-28 framed scope" stay verbatim (they're audit trail; the strategy session described happened under the V28-baseline two-channel model). Forward-looking references to "strategy channel" inside the active step (Step 4.3) are reframed inline in this commit where they exist.
+- *infra/manifest.md* unchanged by this decision — non-git state pointers are independent of operating model.
+- *decision-log.md* gets a chronological entry for this commit; format simplified (no "channel" field).
+
+**Cross-references:** CLAUDE.md (full operating-manual reframe this commit); STATE.md (header reframe this commit); D.20 (Real UX, Minimal Infrastructure — single-session operator is the natural Phase 0 / Phase A operator-side counterpart); Project Core "How to Use the Tree" (session-start + session-end audit discipline — survives unchanged); Working Principle 0.3.7 (Audit Discipline — survives unchanged; applies to in-session architectural decisions); Working Principle 0.3.6 (Plan Evolves With Consciousness — survives unchanged; the docs are the surface that evolves); `docs/decision-log.md` (chronological entry this commit).
+
 
 ---
 

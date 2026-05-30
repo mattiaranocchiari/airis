@@ -1,6 +1,8 @@
-**BATON:** execution (held; awaiting founder preview-deploy validation)
-**Stage / Step:** 4 / 4.3
-**Updated:** 2026-05-28 by execution (Claude Code) @ this commit
+**Active stage / step:** 4 / 4.3 (paradigm prototype — CT scheduling)
+**Operating model:** single Claude Code session per V28 D.25 — the canonical docs are the entire memory; see `/CLAUDE.md`.
+**Active branch:** `claude/zen-johnson-B7Pyc` → draft PR `mattiaranocchiari/airis#4` (open; do not merge until Mattia's preview-deploy validation closes the failure-mode triggers).
+**Status:** in flight — code drop landed, env + auth set up, Mattia to walk validation next.
+**Updated:** 2026-05-28 by Claude Code @ this commit.
 
 ---
 
@@ -35,11 +37,11 @@ Founder validation against the Vercel preview deploy of this PR:
 4. Open the preview URL in two browsers, log in as two clinicians in the same tenant. Walk the corpus through the conversation surface — both browsers should see the grid sync via L2 broadcast.
 5. Measure end-to-end perceived latency on the timing trace surfaced in the conversation panel. Trigger fires at >800 ms; target <500 ms.
 6. Listen to the spoken read-back; evaluate materialisation feel.
-7. If any failure-mode trigger fires (latency >800 ms sustained, intent-parse <90% on the live corpus, L2 jitter / RLS failure, voice quality demo-inadequate, materialisation jarring): surface a Master Doc revision via the strategy channel instead of merging.
+7. If any failure-mode trigger fires (latency >800 ms sustained, intent-parse <90% on the live corpus, L2 jitter / RLS failure, voice quality demo-inadequate, materialisation jarring): surface a Master Doc revision in this session before any merge (per the V28 D.25 single-session operating model).
 8. Otherwise: merge the PR — that closes Step 4.3.
 
-## Open questions for the other channel (strategy)
+## Open questions for Mattia (founder steering)
 
-- **Deepgram vs AssemblyAI choice and ElevenLabs voice asset** — surface to strategy if browser Web Speech Phase 0 turns out adequate for paradigm validation (delay the upgrade) vs inadequate (pull forward to validate the SLO).
-- **eGFR threshold** — Phase 0 mock uses 60 mL/min/1.73m² as the trigger; real clinical guidance lands at Step 4.10 Radiology deep. If founder validation surfaces a different default during the preview-deploy walk, that becomes a Master Doc revision discussion.
-- **CATH registration carry-forward** — Step 4.2's Custom Access Token Hook is still defined but not registered. Step 4.3 didn't surface a need (synthetic English patients don't need Italian claims projected). Register when the localised Italian milestone arrives, or earlier if the preview-deploy walk requires.
+- **Deepgram vs AssemblyAI choice and ElevenLabs voice asset** — defer if browser Web Speech Phase 0 turns out adequate for paradigm validation; pull forward if inadequate for the SLO.
+- **eGFR threshold** — Phase 0 mock uses 60 mL/min/1.73m² as the trigger; real clinical guidance lands at Step 4.10 Radiology deep. If validation surfaces a different default during the preview-deploy walk, that becomes a Master Doc revision call.
+- **CATH registration carry-forward** — Step 4.2's Custom Access Token Hook is still defined but not registered. For Step 4.3 validation Claude Code baked the claim set directly into each test user's `raw_app_meta_data` (faithful: clinician_profiles row mirrors the same values, so enabling the hook later is non-breaking). Register the hook (Supabase Dashboard → Authentication → Hooks → "Customize Access Token (JWT) Claims" → schema `public`, function `custom_access_token_hook`) when the localised Italian milestone arrives or when production-flow auth needs claim projection from clinician_profiles at sign-in.
