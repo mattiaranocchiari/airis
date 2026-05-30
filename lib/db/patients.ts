@@ -1,17 +1,15 @@
 import { randomUUID } from "node:crypto";
-import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { buildEvent, type Actor } from "@/lib/cloudevents";
-import type { Finalita } from "@/lib/finalita";
+import {
+  emitAuditEvent,
+  type AuditEmitResult,
+  type MutationContext,
+} from "@/lib/audit/emitter";
 import type { Database } from "@/lib/supabase/types";
 
 type DB = SupabaseClient<Database>;
 
-const rpcResult = z.object({
-  patient_id: z.string().uuid(),
-  audit_event_id: z.string().uuid(),
-  event_id: z.string(),
-});
+export type { MutationContext };
 
 export type PatientCreateInput = {
   codice_fiscale: string | null;
@@ -23,15 +21,9 @@ export type PatientCreateInput = {
 
 export type PatientUpdateInput = Partial<PatientCreateInput>;
 
-export type MutationContext = {
-  actor: Actor;
-  finalita: Finalita;
-  tenantId: string;
-};
-
 export type PatientRow = Database["public"]["Tables"]["patients"]["Row"];
 
-export type MutationResult = z.infer<typeof rpcResult>;
+export type MutationResult = AuditEmitResult & { patient_id: string };
 
 export async function createPatient(
   db: DB,
@@ -39,10 +31,11 @@ export async function createPatient(
   ctx: MutationContext,
 ): Promise<MutationResult> {
   const patientId = randomUUID();
-  const event = buildEvent("core.patient.created.v1", {
+  const result = await emitAuditEvent(db, {
+    type: "core.patient.created.v1",
+    rpc: "patient_create",
+    ctx,
     subject: patientId,
-    tenantId: ctx.tenantId,
-    actor: ctx.actor,
     data: {
       patient_id: patientId,
       codice_fiscale: input.codice_fiscale,
@@ -51,21 +44,16 @@ export async function createPatient(
       date_of_birth: input.date_of_birth,
       sex: input.sex,
     },
+    args: {
+      p_patient_id: patientId,
+      p_codice_fiscale: input.codice_fiscale,
+      p_given_name: input.given_name,
+      p_family_name: input.family_name,
+      p_date_of_birth: input.date_of_birth,
+      p_sex: input.sex,
+    },
   });
-
-  const { data, error } = await db.rpc("patient_create", {
-    p_patient_id: patientId,
-    p_codice_fiscale: input.codice_fiscale,
-    p_given_name: input.given_name,
-    p_family_name: input.family_name,
-    p_date_of_birth: input.date_of_birth,
-    p_sex: input.sex,
-    p_finalita: ctx.finalita,
-    p_cloudevent_id: event.id,
-    p_cloudevent: event as unknown as Database["public"]["Tables"]["event_queue"]["Insert"]["cloudevent"],
-  });
-  if (error) throw error;
-  return rpcResult.parse(data);
+  return { patient_id: patientId, ...result };
 }
 
 export async function updatePatient(
@@ -83,26 +71,22 @@ export async function updatePatient(
     throw new Error("no fields to update");
   }
 
-  const event = buildEvent("core.patient.updated.v1", {
+  const result = await emitAuditEvent(db, {
+    type: "core.patient.updated.v1",
+    rpc: "patient_update",
+    ctx,
     subject: patientId,
-    tenantId: ctx.tenantId,
-    actor: ctx.actor,
     data: { patient_id: patientId, changed_fields: changed },
+    args: {
+      p_patient_id: patientId,
+      p_codice_fiscale: input.codice_fiscale ?? null,
+      p_given_name: input.given_name ?? null,
+      p_family_name: input.family_name ?? null,
+      p_date_of_birth: input.date_of_birth ?? null,
+      p_sex: input.sex ?? null,
+    },
   });
-
-  const { data, error } = await db.rpc("patient_update", {
-    p_patient_id: patientId,
-    p_codice_fiscale: input.codice_fiscale ?? null,
-    p_given_name: input.given_name ?? null,
-    p_family_name: input.family_name ?? null,
-    p_date_of_birth: input.date_of_birth ?? null,
-    p_sex: input.sex ?? null,
-    p_finalita: ctx.finalita,
-    p_cloudevent_id: event.id,
-    p_cloudevent: event as unknown as Database["public"]["Tables"]["event_queue"]["Insert"]["cloudevent"],
-  });
-  if (error) throw error;
-  return rpcResult.parse(data);
+  return { patient_id: patientId, ...result };
 }
 
 export async function deletePatient(
@@ -110,21 +94,15 @@ export async function deletePatient(
   patientId: string,
   ctx: MutationContext,
 ): Promise<MutationResult> {
-  const event = buildEvent("core.patient.deleted.v1", {
+  const result = await emitAuditEvent(db, {
+    type: "core.patient.deleted.v1",
+    rpc: "patient_delete",
+    ctx,
     subject: patientId,
-    tenantId: ctx.tenantId,
-    actor: ctx.actor,
     data: { patient_id: patientId },
+    args: { p_patient_id: patientId },
   });
-
-  const { data, error } = await db.rpc("patient_delete", {
-    p_patient_id: patientId,
-    p_finalita: ctx.finalita,
-    p_cloudevent_id: event.id,
-    p_cloudevent: event as unknown as Database["public"]["Tables"]["event_queue"]["Insert"]["cloudevent"],
-  });
-  if (error) throw error;
-  return rpcResult.parse(data);
+  return { patient_id: patientId, ...result };
 }
 
 export async function listPatients(db: DB): Promise<PatientRow[]> {

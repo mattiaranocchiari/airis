@@ -1,17 +1,19 @@
 import { randomUUID } from "node:crypto";
-import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { buildEvent, type Actor } from "@/lib/cloudevents";
-import type { Finalita } from "@/lib/finalita";
+import {
+  emitAuditEvent,
+  type AuditEmitResult,
+  type MutationContext,
+} from "@/lib/audit/emitter";
 import type { Database } from "@/lib/supabase/types";
 
 type DB = SupabaseClient<Database>;
 
-const rpcResult = z.object({
-  appointment_id: z.string().uuid(),
-  audit_event_id: z.string().uuid(),
-  event_id: z.string(),
-});
+export type { MutationContext };
+
+// Scheduler mutations carry their own CloudEvents source so the audit row's
+// source_subsystem reads `core.scheduler` (vs. the patient-registry default).
+const SCHEDULER_SOURCE = "airis://core/scheduler";
 
 export type AppointmentCreateInput = {
   room_id: string;
@@ -32,15 +34,9 @@ export type AppointmentUpdateInput = {
   notes?: string | null;
 };
 
-export type MutationContext = {
-  actor: Actor;
-  finalita: Finalita;
-  tenantId: string;
-};
-
 export type AppointmentRow = Database["public"]["Tables"]["appointments"]["Row"];
 
-export type MutationResult = z.infer<typeof rpcResult>;
+export type MutationResult = AuditEmitResult & { appointment_id: string };
 
 export async function createAppointment(
   db: DB,
@@ -48,11 +44,12 @@ export async function createAppointment(
   ctx: MutationContext,
 ): Promise<MutationResult> {
   const appointmentId = randomUUID();
-  const event = buildEvent("core.appointment.created.v1", {
+  const result = await emitAuditEvent(db, {
+    type: "core.appointment.created.v1",
+    rpc: "appointment_create",
+    ctx,
     subject: appointmentId,
-    tenantId: ctx.tenantId,
-    actor: ctx.actor,
-    source: "airis://core/scheduler",
+    source: SCHEDULER_SOURCE,
     data: {
       appointment_id: appointmentId,
       room_id: input.room_id,
@@ -64,24 +61,19 @@ export async function createAppointment(
       slot_end_at: input.slot_end_at,
       notes: input.notes,
     },
+    args: {
+      p_appointment_id: appointmentId,
+      p_room_id: input.room_id,
+      p_patient_id: input.patient_id,
+      p_kind: input.kind,
+      p_subtype: input.subtype,
+      p_with_contrast: input.with_contrast,
+      p_slot_start_at: input.slot_start_at,
+      p_slot_end_at: input.slot_end_at,
+      p_notes: input.notes,
+    },
   });
-
-  const { data, error } = await db.rpc("appointment_create", {
-    p_appointment_id: appointmentId,
-    p_room_id: input.room_id,
-    p_patient_id: input.patient_id,
-    p_kind: input.kind,
-    p_subtype: input.subtype,
-    p_with_contrast: input.with_contrast,
-    p_slot_start_at: input.slot_start_at,
-    p_slot_end_at: input.slot_end_at,
-    p_notes: input.notes,
-    p_finalita: ctx.finalita,
-    p_cloudevent_id: event.id,
-    p_cloudevent: event as unknown as Database["public"]["Tables"]["event_queue"]["Insert"]["cloudevent"],
-  });
-  if (error) throw error;
-  return rpcResult.parse(data);
+  return { appointment_id: appointmentId, ...result };
 }
 
 const updatableFields = [
@@ -106,27 +98,23 @@ export async function updateAppointment(
     throw new Error("no fields to update");
   }
 
-  const event = buildEvent("core.appointment.updated.v1", {
+  const result = await emitAuditEvent(db, {
+    type: "core.appointment.updated.v1",
+    rpc: "appointment_update",
+    ctx,
     subject: appointmentId,
-    tenantId: ctx.tenantId,
-    actor: ctx.actor,
-    source: "airis://core/scheduler",
+    source: SCHEDULER_SOURCE,
     data: { appointment_id: appointmentId, changed_fields: changed },
+    args: {
+      p_appointment_id: appointmentId,
+      p_subtype: input.subtype ?? null,
+      p_with_contrast: input.with_contrast ?? null,
+      p_slot_start_at: input.slot_start_at ?? null,
+      p_slot_end_at: input.slot_end_at ?? null,
+      p_notes: input.notes ?? null,
+    },
   });
-
-  const { data, error } = await db.rpc("appointment_update", {
-    p_appointment_id: appointmentId,
-    p_subtype: input.subtype ?? null,
-    p_with_contrast: input.with_contrast ?? null,
-    p_slot_start_at: input.slot_start_at ?? null,
-    p_slot_end_at: input.slot_end_at ?? null,
-    p_notes: input.notes ?? null,
-    p_finalita: ctx.finalita,
-    p_cloudevent_id: event.id,
-    p_cloudevent: event as unknown as Database["public"]["Tables"]["event_queue"]["Insert"]["cloudevent"],
-  });
-  if (error) throw error;
-  return rpcResult.parse(data);
+  return { appointment_id: appointmentId, ...result };
 }
 
 export async function cancelAppointment(
@@ -134,22 +122,16 @@ export async function cancelAppointment(
   appointmentId: string,
   ctx: MutationContext,
 ): Promise<MutationResult> {
-  const event = buildEvent("core.appointment.cancelled.v1", {
+  const result = await emitAuditEvent(db, {
+    type: "core.appointment.cancelled.v1",
+    rpc: "appointment_cancel",
+    ctx,
     subject: appointmentId,
-    tenantId: ctx.tenantId,
-    actor: ctx.actor,
-    source: "airis://core/scheduler",
+    source: SCHEDULER_SOURCE,
     data: { appointment_id: appointmentId },
+    args: { p_appointment_id: appointmentId },
   });
-
-  const { data, error } = await db.rpc("appointment_cancel", {
-    p_appointment_id: appointmentId,
-    p_finalita: ctx.finalita,
-    p_cloudevent_id: event.id,
-    p_cloudevent: event as unknown as Database["public"]["Tables"]["event_queue"]["Insert"]["cloudevent"],
-  });
-  if (error) throw error;
-  return rpcResult.parse(data);
+  return { appointment_id: appointmentId, ...result };
 }
 
 export type ListAppointmentsFilter = {

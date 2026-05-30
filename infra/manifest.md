@@ -19,7 +19,7 @@ Update on every change to deployed infrastructure or environment configuration.
 - **Region:** `eu-west-3` (EU)
 - **Plan:** managed free tier
 - **Postgres version:** 17
-- **Migration level:** 23 (see `supabase/migrations/`)
+- **Migration level:** 23 (see `supabase/migrations/`). Enforced gap-free + contiguous (one global 6-digit counter under the `YYYYMMDD` date prefix; level == count) by `npm run check:migrations` per §17.20 (MDR Class IIb change control).
 - **Schemas:**
   - `public`: `tenants`, `clinician_profiles`, `patients`, `audit_events`, `event_queue`, `appointments`, `egfr_results` (Phase 0 mock).
     Functions: `current_tenant_id`, `custom_access_token_hook`, `patient_create`, `patient_update`, `patient_delete`, `appointment_create`, `appointment_update`, `appointment_cancel`.
@@ -40,11 +40,13 @@ Update on every change to deployed infrastructure or environment configuration.
 - **Entry points:** `app/layout.tsx` (`lang="en"` per V28 D.24), `app/page.tsx`, `app/scheduler/page.tsx` (Step 4.3 CT-scheduling paradigm prototype).
 - **API routes:** `app/api/patients/route.ts` (GET list + POST), `app/api/patients/[id]/route.ts` (GET + PATCH + DELETE).
 - **Server actions:** `app/scheduler/actions.ts` (`interpretUtterance`, `confirmContrastBooking`, `loadGridForCT1`).
+- **Audited mutations:** `lib/audit/emitter.ts` (`emitAuditEvent`) is the single Node-side audited path per D.17 + §17.9 — build the CloudEvents v1.0.2 envelope, dispatch the atomic RPC, and let the DB function write row + `event_queue` outbox + hash-chained L6 audit row in one transaction. `lib/db/patients.ts` + `lib/db/appointments.ts` delegate to it; later subsystems call it instead of re-rolling per-RPC. Chain ordering (per-tenant monotonic `chain_sequence`) stays in `airis_internal.audit_events_append`.
 - **Runtime deps:** `@supabase/supabase-js`, `@supabase/ssr`, `@anthropic-ai/sdk`, `zod`, `ulid`.
 - **Test runner:** Vitest (dev dep), test scripts `npm run test` / `npm run test:watch`. Unit tests run unconditionally; integration tests under `tests/*.roundtrip.test.ts` + `tests/realtime.policy.test.ts` skip when `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` / `SUPABASE_SERVICE_ROLE_KEY` are absent (env-gated via `tests/setup.ts`).
 - **Intent corpus harness:** `npm run eval:intents` (uses `tsx`) runs the English intent corpus against the live Claude API; exits non-zero on <90% pass-rate. Skips with a clean exit when `ANTHROPIC_API_KEY` is unset; `INTENT_EVAL_MOCK=1` runs structure-only.
-- **Scripts:** `npm run dev | build | start | lint | test | test:watch | typecheck | eval:intents`.
-- **CI:** `.github/workflows/ci.yml` runs build + lint + typecheck + test + eval:intents on PR; live-DB suites and intent eval activate when their respective repo secrets are set.
+- **Scripts:** `npm run dev | build | start | lint | test | test:watch | typecheck | check:migrations | changelog | eval:intents`.
+- **Change control (§17.20 / MDR Class IIb):** `npm run check:migrations` (gap-free + contiguous migration sequence; CI gate) + `npm run changelog` (regenerates `CHANGELOG.md` from squash-merged PR titles on `main` — a derived artifact, run after merges, not hand-edited; pure check logic in `scripts/lib/migrations.ts` with unit coverage in `tests/migrations.check.test.ts`). PR-template enforcement + branch protection (the "G heavy" scaffolding) and changelog post-merge auto-commit are deferred pending Mattia's direction.
+- **CI:** `.github/workflows/ci.yml` runs build + lint + typecheck + check:migrations + test + eval:intents on PR; live-DB suites and intent eval activate when their respective repo secrets are set.
 
 ## Vercel
 

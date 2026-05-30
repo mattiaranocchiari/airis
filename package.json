@@ -10,6 +10,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
+    "check:migrations": "tsx scripts/check-migrations.ts",
+    "changelog": "tsx scripts/gen-changelog.ts",
     "eval:intents": "tsx scripts/eval-intents.ts"
   },
   "dependencies": {
