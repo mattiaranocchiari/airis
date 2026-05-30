@@ -71,6 +71,22 @@ Update on every change to deployed infrastructure or environment configuration.
 - **Future concrete backends** (land as their respective deployment modes get exercised; not yet implemented): Mode 1 client-local self-hosted (e.g. Ollama-backed); Mode 3 AIRIS-hosted non-HQ. Adding a backend means: (1) implement `LlmProvider` from `@/lib/llm/types` in a new file under `lib/llm/`; (2) extend the switch in `lib/llm/index.ts`; (3) document the new env-var contract in this file. Earlier framings (Ollama VPS / Bedrock EU / Mistral La Plateforme EU) retired as platform commitments per the 2026-05-28 strategy session reframe; see Master Doc D.21 + D.22 supersession history.
 - **Model + version:** record the active Claude model name + version in this manifest as deployments configure them. Phase A dev uses the model identifier set in `ANTHROPIC_API_KEY`'s associated workspace; no specific version pinned in this Master Doc.
 
+## Phase A managed infra (Step 4.5 Turn 2 — pending activation)
+
+Founder steer 2026-05-30: activate all now. Each is **free tier, EU region**;
+Mattia creates the account + provides secrets, Claude wires the code behind the
+§17 abstraction with graceful degradation (Phase 0 path when secrets absent).
+Onboarding checklist + sequencing in `docs/Step_4.5_Turn2_plan.md`. Record live
+URLs / dashboard links here as each lands.
+
+- **Inngest Cloud (EU)** — D.16 + §17.3 durable execution; first use is the
+  `event_queue` outbox drain/fan-out. App id `airis`. Selector `AIRIS_EVENTS_BACKEND` (`outbox` default | `inngest`). Serve endpoint planned at `app/api/inngest/route.ts`.
+- **Upstash Redis (EU)** — §17.4 L3 cache (replaces the in-process Map in `lib/consciousness/cache.ts`). Selector `AIRIS_CACHE_BACKEND` (`memory` default | `upstash`). Note: sync→async API decision flagged in the Turn 2 plan.
+- **Sentry (EU)** — §17.17 SRE error capture (Next.js client/server/edge). Disjoint from the L6 audit chain by construction (D.17 + §17.16).
+- **Grafana Cloud (EU)** — §17.16 metrics/traces; `TimingTrace` dual-surface latency exported via OTLP. Disjoint from audit observability.
+- **CATH (sub-deliverable C)** — no new account; one-time Supabase dashboard enablement of `public.custom_access_token_hook` (see Supabase section above + Turn 2 plan). Remote-guided 2026-05-30.
+- **Branch protection (G heavy)** — Mattia, repo Settings → Branches: require the `build-lint-typecheck-test` check on `main`. PR template landed (`.github/pull_request_template.md`).
+
 ## Secret names (values NOT in repo)
 
 The following names are expected/used; values live in Vercel/Supabase env (production) and developers' local `.env.local` (gitignored). Never commit values.
@@ -87,5 +103,11 @@ The following names are expected/used; values live in Vercel/Supabase env (produ
 - `DEEPGRAM_API_KEY` — Phase D follow-up English streaming STT (deferred per `lib/voice/stt.ts`).
 - `ASSEMBLYAI_API_KEY` — alternative to Deepgram; pick one.
 - `ELEVENLABS_API_KEY` — Phase D follow-up English TTS WebSocket (deferred per `lib/voice/tts.ts`).
+- `AIRIS_EVENTS_BACKEND` — optional; selects the event fan-out backend (`outbox` default | `inngest`) per Step 4.5 Turn 2 D.
+- `INNGEST_EVENT_KEY` / `INNGEST_SIGNING_KEY` — Inngest Cloud (EU) durable execution; required when `AIRIS_EVENTS_BACKEND=inngest`.
+- `AIRIS_CACHE_BACKEND` — optional; selects the L3 cache backend (`memory` default | `upstash`) per Step 4.5 Turn 2 E.
+- `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` — Upstash Redis (EU); required when `AIRIS_CACHE_BACKEND=upstash`.
+- `SENTRY_DSN` (or `NEXT_PUBLIC_SENTRY_DSN`) / `SENTRY_AUTH_TOKEN` — Sentry (EU) error capture; auth token gates source-map upload at build.
+- `GRAFANA_OTLP_ENDPOINT` / `GRAFANA_OTLP_TOKEN` — Grafana Cloud (EU) OTLP export of the dual-surface `TimingTrace`.
 
 Extend this list as new secrets are provisioned. Never add values.
