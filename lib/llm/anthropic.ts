@@ -1,38 +1,30 @@
 import Anthropic from "@anthropic-ai/sdk";
+import type {
+  LlmProvider,
+  ParseStructuredOptions,
+  ParseStructuredResult,
+} from "@/lib/llm/types";
 
-// Substrate L5 call site per AIRIS_Master_Document §17.5 + V28 D.22.
-// Current concrete backend: Claude API direct (an instance of deployment Mode 2).
-// At Step 4.5 the call site moves behind the engine-agnostic abstraction (D.21)
-// without semantics change — the interface here (parseStructured) is the contract
-// that survives.
+// Anthropic concrete implementation of the engine-agnostic LLM substrate
+// (V28 D.21 + §17.5). This is the current concrete backend per V28 D.22 —
+// Claude API direct, an instance of deployment Mode 2 (online API).
 //
-// Model + thinking + effort are all env-configurable so the deployment chooses
-// the cost / latency / quality point. Source defaults pick the most capable model;
-// per-deployment overrides shape the SLO. Source never pins specific marketing
-// names in commit messages or PR titles per the AIRIS operating manual.
-
-export type LlmUsage = {
-  inputTokens: number;
-  outputTokens: number;
-  cacheCreationInputTokens: number;
-  cacheReadInputTokens: number;
-};
-
-export type ParseStructuredOptions = {
-  systemPrompt: string;
-  userMessage: string;
-  schema: Record<string, unknown>;
-};
-
-export type ParseStructuredResult<T> = {
-  parsed: T;
-  usage: LlmUsage;
-  modelLatencyMs: number;
-};
-
-export type LlmProvider = {
-  parseStructured: <T>(opts: ParseStructuredOptions) => Promise<ParseStructuredResult<T>>;
-};
+// Application code does NOT import this file directly. It goes through
+// `getLlmProvider()` in `@/lib/llm` which resolves the active backend
+// from `AIRIS_LLM_BACKEND` at deployment time. This file is one
+// concrete implementation among potentially many (Mode 1 client-local
+// self-hosted; Mode 3 AIRIS-hosted non-HQ); the abstraction promise is
+// that swapping backends is configuration, not rewrite.
+//
+// Model + thinking + effort are env-configurable so deployments pick the
+// cost / latency / quality point. Source defaults pick the most capable
+// model; per-deployment overrides shape the SLO. Source never pins
+// specific marketing names in commit messages or PR titles per the AIRIS
+// operating manual.
+//
+// Tests can construct providers directly via `createAnthropicProvider()`
+// for unit-test scenarios where an injectable provider is preferable to
+// the env-driven lookup.
 
 function clientFromEnv(): Anthropic {
   return new Anthropic({
@@ -102,3 +94,8 @@ export function createAnthropicProvider(): LlmProvider {
     },
   };
 }
+
+// Re-export the types from the abstraction contract so existing callers that
+// imported these from `@/lib/llm/anthropic` keep working during the lift.
+// New code should import directly from `@/lib/llm` instead.
+export type { LlmProvider, ParseStructuredOptions, ParseStructuredResult, LlmUsage } from "@/lib/llm/types";
