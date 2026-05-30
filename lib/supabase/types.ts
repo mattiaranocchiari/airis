@@ -3,8 +3,9 @@
 // Local patches (re-apply after every regeneration; grep this file for
 // `PATCH:` to find them):
 //   - PATCH: typegen renders DEFAULT NULL plpgsql args as plain `string`.
-//     Nullable args (codice_fiscale, date_of_birth, sex on patient_create/
-//     patient_update) are marked `string | null` so callers can pass null.
+//     Nullable args on patient_create / patient_update / appointment_create /
+//     appointment_update are marked `string | null` (or `boolean | null`) so
+//     callers can pass null for "no change" / "unknown".
 export type Json =
   | string
   | number
@@ -19,6 +20,75 @@ export type Database = {
   }
   public: {
     Tables: {
+      appointments: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          id: string
+          kind: string
+          notes: string | null
+          patient_id: string
+          room_id: string
+          slot_end_at: string
+          slot_start_at: string
+          status: string
+          subtype: string | null
+          tenant_id: string
+          updated_at: string
+          with_contrast: boolean
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          kind: string
+          notes?: string | null
+          patient_id: string
+          room_id: string
+          slot_end_at: string
+          slot_start_at: string
+          status?: string
+          subtype?: string | null
+          tenant_id: string
+          updated_at?: string
+          with_contrast?: boolean
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          kind?: string
+          notes?: string | null
+          patient_id?: string
+          room_id?: string
+          slot_end_at?: string
+          slot_start_at?: string
+          status?: string
+          subtype?: string | null
+          tenant_id?: string
+          updated_at?: string
+          with_contrast?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_events: {
         Row: {
           actor: Json
@@ -137,6 +207,48 @@ export type Database = {
           },
         ]
       }
+      egfr_results: {
+        Row: {
+          created_at: string
+          id: string
+          patient_id: string
+          taken_at: string
+          tenant_id: string
+          value: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          patient_id: string
+          taken_at?: string
+          tenant_id: string
+          value: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          patient_id?: string
+          taken_at?: string
+          tenant_id?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "egfr_results_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "egfr_results_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_queue: {
         Row: {
           cloudevent: Json
@@ -242,6 +354,46 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      appointment_cancel: {
+        Args: {
+          p_appointment_id: string
+          p_cloudevent: Json
+          p_cloudevent_id: string
+          p_finalita: string
+        }
+        Returns: Json
+      }
+      appointment_create: {
+        Args: {
+          p_appointment_id: string
+          p_cloudevent: Json
+          p_cloudevent_id: string
+          p_finalita: string
+          p_kind: string
+          p_notes: string | null // PATCH: nullable in SQL
+          p_patient_id: string
+          p_room_id: string
+          p_slot_end_at: string
+          p_slot_start_at: string
+          p_subtype: string | null // PATCH: nullable in SQL
+          p_with_contrast: boolean
+        }
+        Returns: Json
+      }
+      appointment_update: {
+        Args: {
+          p_appointment_id: string
+          p_cloudevent: Json
+          p_cloudevent_id: string
+          p_finalita: string
+          p_notes: string | null // PATCH: nullable in SQL (no-change)
+          p_slot_end_at: string | null // PATCH: nullable in SQL (no-change)
+          p_slot_start_at: string | null // PATCH: nullable in SQL (no-change)
+          p_subtype: string | null // PATCH: nullable in SQL (no-change)
+          p_with_contrast: boolean | null // PATCH: nullable in SQL (no-change)
+        }
+        Returns: Json
+      }
       current_tenant_id: { Args: never; Returns: string }
       custom_access_token_hook: { Args: { event: Json }; Returns: Json }
       patient_create: {

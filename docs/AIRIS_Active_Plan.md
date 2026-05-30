@@ -25,19 +25,22 @@ This plan operates under V28 Part 0 Working Principles:
 
 **Active stage:** Stage 4 — SW Build (Phase 0 + Phase A SW completion)
 
-**Active step:** Step 4.3 — Paradigm prototype build (CT scheduling)
+**Active step:** Step 4.4 — Phase 0 → Phase A transition (synthesis pass; Step 4.5 plan stub).
 
 **Step 4.1 status:** ✓ complete (Next.js scaffold + minimal Phase 0 procurement landed across two execution turns, 2026-05-28).
 
 **Step 4.2 status:** ✓ complete (Patient Registry endpoint with auth-gating + tenant scoping by construction + CloudEvents envelope + hash-chained L6 audit ledger per D.17 + Italian-claim Custom Access Token Hook stub per D.18; foundation patterns set for Phase A core systems — see STATE.md "Just done" for the full surface).
 
-**Step 4.3 status:** active. Strategy session 2026-05-28 framed scope, reframed D.21 + D.22, added D.24 (international platform; Italy as first deployment market), drafted `docs/Step_4.3_plan.md` as the execution-turn plan. Execution turn opens against that plan next.
+**Step 4.3 status:** ✓ complete (2026-05-30). Paradigm prototype (CT scheduling) landed across two execution turns under the **single-session operating model** (V28 D.25): dual-surface sync (Supabase Realtime Broadcast on private channels with RLS authorization on `realtime.messages` — new RLS territory); English intent parsing on Claude API direct with structured outputs + prompt caching (`lib/llm/anthropic.ts`); consciousness substrate L1+L2+L3+L5+L6 + first sketches of the four AIRIS-native contracts (`read / write / subscribe / resolve` in `lib/consciousness/`); appointment_create / appointment_update / appointment_cancel atomic RPCs (mirror the `patient_*` pattern — row mutation + CloudEvents outbox + L6 audit-chain append in one transaction); UI dual-surface with drag-to-move on the grid + auto-retry on patient-disambiguation (the "feels like one event" property held across both directions); voice transport Phase 0 via browser-native SpeechRecognition + speechSynthesis (Deepgram / ElevenLabs land in Phase D follow-up behind the same callback contract); `lang="en"` per D.24. Failure-mode triggers all wired as measurable checks (latency `TimingTrace`, `npm run eval:intents` corpus harness, live-DB realtime policy test, qualitative voice/materialisation reads). Founder validation 2026-05-30: paradigm confirmed; no triggers fired; no Master Doc revision required. Architectural additions this step: **D.25 (single-session integrated operator)** + the four-contracts implementation sketch. See `docs/Step_4.3_plan.md` (execution-turn plan) + `docs/Step_4.3_notes.md` (companion to the Step 4.2 `notes.md`) for what landed, what's deferred, and the operational deltas absorbed during the build.
 
-**Total Phase 0 cost (revised post-2026-05-28):** ~$20/mo Claude Code Pro + Claude API usage (load-bearing for Phase 0 paradigm prototype + ongoing development; usage-based, no fixed monthly commitment) + ~$30-80/mo voice API usage when Step 4.3 voice surface lands (English STT + ElevenLabs default English TTS).
+**Step 4.4 status:** active (opens immediately on Step 4.3 close, 2026-05-30). Synthesis pass: confirm paradigm validation outcome (held); record Phase 0 learnings worth carrying into Phase A (substrate L2 RLS on `realtime.messages` works as the channel-private contract; L3 in-process map sufficient for Phase 0; L5 Claude API direct with structured outputs is the right call-site shape; drag-to-move + auto-retry are both load-bearing for the dual-surface paradigm); decide V28 → V29 atomic-commit timing (working answer: continue accumulating in V28 — V29 lands when Step 4.5 core systems work delivers the engine-agnostic LLM abstraction lift + Inngest + observability + Patient Flow Layer scaffolding, which is a much larger cross-cutting shift worth versioning around); confirm Phase A core systems work (Step 4.5) is unblocked. Output: `docs/Step_4.4_notes.md` + `docs/Step_4.5_plan.md` stub.
+
+**Total Phase 0 cost (revised post-2026-05-28):** ~$20/mo Claude Code Pro + Claude API usage (load-bearing for Phase 0 paradigm prototype + ongoing development; usage-based, no fixed monthly commitment). Voice API spend (English STT + ElevenLabs default English TTS) deferred — Phase 0 used browser-native Web Speech / speechSynthesis (zero external keys); paid voice activates at Step 4.14 Voice Stack Integration.
 
 **Critical commitments carried forward:**
-- **Engine-agnostic LLM substrate abstraction** (V28 D.21, Section 17.5) — three deployment modes (client-local self-hosted, online API, AIRIS-hosted non-HQ); built from Step 4.5 onward (Phase A core systems), NOT deferred. Step 4.3 prototype runs on the current concrete backend (Claude API direct per D.22) and moves behind the abstraction at Step 4.5 without semantics change.
+- **Engine-agnostic LLM substrate abstraction** (V28 D.21, Section 17.5) — three deployment modes (client-local self-hosted, online API, AIRIS-hosted non-HQ); built from Step 4.5 onward (Phase A core systems), NOT deferred. Step 4.3 prototype ran on the current concrete backend (Claude API direct per D.22) through `lib/llm/anthropic.ts`; at Step 4.5 the call site moves behind the engine-agnostic abstraction without semantics change.
 - **International platform; Italy as first deployment market** (V28 D.24) — platform architecture locale-agnostic by construction; Italian content in the Master Doc is Italy's localization layer at first-market depth. Step 4.3 paradigm prototype built in English (platform default); Italian-localized paradigm validation is a follow-on milestone aligned with Italian-market readiness.
+- **Single-session integrated operator** (V28 D.25) — one Claude Code session is the project's complete operator; canonical docs are the entire memory across sessions; flush-before-end is existential; context-agnostic-machine property holds by construction.
 
 ---
 
@@ -59,7 +62,7 @@ Net +569 lines V26 → V27. D.14-D.19 added; R.11 added; Part II Section 17 Engi
 
 **Scope per V28 D.10 + D.11**: All eleven modules at varying depth; Radiology + one cross-module flow second module deep; all three Builders working at production discipline; Regulatory Layer real with at least one Italian artifact; interaction layer + consciousness substrate working on deep parts.
 
-**Operational philosophy per V28 D.20**: Real UX uncompromised on Phase 0 / early Phase A; backing infrastructure minimal (managed Supabase EU + Vercel free tier + Ollama VPS + Claude Code). Production-grade self-hosted topology activates Phase D pre-deployment.
+**Operational philosophy per V28 D.20**: Real UX uncompromised on Phase 0 / early Phase A; backing infrastructure minimal (managed Supabase EU + Vercel free tier + Claude API direct per V28 D.22). Production-grade self-hosted topology activates Phase D pre-deployment.
 
 **Critical discipline per V28 D.21**: Three-backend LLM abstraction built from Step 4.5 onward.
 
@@ -67,7 +70,7 @@ Net +569 lines V26 → V27. D.14-D.19 added; R.11 added; Part II Section 17 Engi
 
 ##### Step 4.1 — Day 1: Minimal infrastructure setup + dev environment [ACTIVE]
 
-Procurement: GitHub free + Supabase managed EU free tier + Vercel free tier + Claude Code Pro ($20/mo) + Claude Desktop App for Windows + existing Ollama VPS. ElevenLabs subscription added when Step 4.3 begins (~$22/mo + per-character usage).
+Procurement: GitHub free + Supabase managed EU free tier + Vercel free tier + Claude Code Pro ($20/mo) + Claude Desktop App for Windows + Claude API direct (per V28 D.22; usage-based; powers the L5 intent parse path in Step 4.3). ElevenLabs subscription deferred — Phase 0 voice transport uses browser-native Web Speech / speechSynthesis (zero external keys); paid voice activates at Step 4.14 Voice Stack Integration.
 
 Dev environment: Code on Windows PC; `npm run dev` runs locally; deploys via git push to Vercel; Supabase MCP + GitHub MCP connectors in Claude Desktop App; CLAUDE.md at repo root pointing to V28 Master Doc + Active Plan + Project Core.
 
@@ -83,29 +86,29 @@ Dev environment: Code on Windows PC; `npm run dev` runs locally; deploys via git
 
 ##### Step 4.3 — Paradigm prototype build (CT scheduling)
 
-**Status:** Active. Strategy session 2026-05-28 framed scope; plan committed at `docs/Step_4.3_plan.md`; execution turn opens against that plan next.
+**Status:** ✓ complete (2026-05-30; landed under the single-session operating model per V28 D.25). See CURRENT STATE block above for what landed; see `docs/Step_4.3_plan.md` (execution-turn plan) + `docs/Step_4.3_notes.md` (companion to Step 4.2 `notes.md`) for what's deferred and the operational deltas.
 
-**Scope (post-2026-05-28 strategy reframe):** Smallest CT-scheduling slice that exercises all four pillars — dual-surface real-time sync per V28 D.8 + §17.4 (Supabase Realtime Broadcast on private channels with RLS); locale-aware intent parsing in **English** (platform default per V28 D.24); voice surface (English STT + ElevenLabs default English TTS — Italian-localized voice character is downstream); patient context inference via consciousness substrate (L1 + L2 + L3 + L5 + L6 in Phase 0 scope; L4 embeddings deferred; four AIRIS-native contracts sketched). Paradigm-prototype design details worked out from V28 architectural commitments — see `docs/Step_4.3_plan.md` for the execution-turn plan.
+**Scope (post-2026-05-28 strategy reframe, executed under D.25):** Smallest CT-scheduling slice that exercises all four pillars — dual-surface real-time sync per V28 D.8 + §17.4 (Supabase Realtime Broadcast on private channels with RLS authorization on `realtime.messages` — new RLS territory for this project); locale-aware intent parsing in **English** (platform default per V28 D.24); voice surface (Phase 0 zero-key path via browser-native SpeechRecognition + speechSynthesis; Deepgram English / AssemblyAI English / ElevenLabs default English are Phase D follow-up behind the same `onTranscript` callback contract); patient context inference via consciousness substrate (L1 + L2 + L3 + L5 + L6 in Phase 0 scope; L4 embeddings deferred; four AIRIS-native contracts sketched as `read / write / subscribe / resolve` in `lib/consciousness/`). Paradigm-prototype design details worked out from V28 architectural commitments — see `docs/Step_4.3_plan.md`.
 
-**LLM backend:** **Claude API direct** per V28 D.22 (current concrete backend; an instance of deployment Mode 2 under the engine-agnostic abstraction). Step 4.3 calls the API directly; at Step 4.5 the call site moves behind the engine-agnostic abstraction (per V28 D.21) without semantics change. Earlier framings naming Ollama / Bedrock / Mistral were retired in the 2026-05-28 strategy session reframe of D.21 + D.22.
+**LLM backend:** **Claude API direct** per V28 D.22 (current concrete backend; an instance of deployment Mode 2 under the engine-agnostic abstraction). Step 4.3 called the API directly through `lib/llm/anthropic.ts`; at Step 4.5 the call site moves behind the engine-agnostic abstraction (per V28 D.21) without semantics change. Earlier framings naming Ollama / Bedrock / Mistral were retired in the 2026-05-28 strategy session reframe of D.21 + D.22.
 
-**Voice transport:** Node-native Phase 0 (no Pipecat). Browser WebRTC → English streaming STT → Next.js → Claude API → ElevenLabs default English TTS → browser audio. §17.6 Pipecat commitment lands at Step 4.14 with the full voice stack; the intent contract is stable across the transport change.
+**Voice transport:** Phase 0 used browser-native SpeechRecognition + speechSynthesis (zero external keys; Chrome / Edge English). §17.6 commitments (Pipecat / Silero / Smart Turn v3 / MedWhisper / Deepgram / AssemblyAI / ElevenLabs / Cartesia / Azure) land at Step 4.14 with the full voice stack; the `onTranscript` callback contract is stable across the transport change.
 
 **Language:** **English** (platform default per D.24). Italian-localized paradigm validation is a follow-on milestone aligned with Italian-market readiness (likely Step 4.10 Radiology deep + Italian voice talent Stage 5.2).
 
-**Output:** Either confirmation that the V28 stack commitment + minimal-infrastructure approach holds for paradigm validation, OR Master Doc revision if iteration doesn't converge. Failure-mode triggers set in `docs/Step_4.3_plan.md` before execution.
+**Outcome:** Paradigm validation **held** (founder validation 2026-05-30). No failure-mode trigger fired; no Master Doc revision required. Architectural additions this step: **D.25 (single-session integrated operator)** + the four-contracts implementation sketch + the `realtime.messages` per-tenant RLS policy as the §17.4 L2 contract.
 
 ##### Step 4.4 — Phase 0 → Phase A transition
 
-**Status:** Not started.
+**Status:** Active (opens 2026-05-30 on Step 4.3 close).
 
-**Scope:** Synthesize Phase 0 learnings (paradigm validation outcomes, Claude Code experience, any V28 → V29 commit-worthy content). Update Master Doc if needed. Confirm Phase A core systems work is unblocked.
+**Scope:** Synthesize Phase 0 learnings (paradigm validation outcome — held; Claude Code experience; any V28 → V29 commit-worthy content). Decide V28 → V29 atomic-commit timing (working answer: continue accumulating in V28; V29 lands when Step 4.5 delivers the engine-agnostic LLM abstraction lift + Inngest + observability + Patient Flow Layer scaffolding — a much larger cross-cutting shift worth versioning around). Confirm Phase A core systems work (Step 4.5) is unblocked. Output: `docs/Step_4.4_notes.md` + `docs/Step_4.5_plan.md` stub.
 
 #### Phase A SW execution (Steps 4.5-4.17)
 
 ##### Step 4.5 — Core systems build
 
-Production discipline foundation: Italian clinician identity composition (per D.18 + §17.13) + tenant scoping by construction + secrets management (Infisical per §17.15 when activated) + audit ledger emitter library (per D.17) + observability stacks (per §17.16-17.17 when production traffic exists) + backup 3-2-1 (per §17.18 when scale matters) + CI/CD pre-merge gates (per §17.19) + MDR Class IIb change control scaffolding (per §17.20) + **three-backend LLM abstraction with local self-hosted as active backend** (per V28 D.21 + Section 17.5 — built starting THIS step, NOT deferred).
+Production discipline foundation: Italian clinician identity composition (per D.18 + §17.13) + tenant scoping by construction + secrets management (Infisical per §17.15 when activated) + audit ledger emitter library (per D.17) + observability stacks (per §17.16-17.17 when production traffic exists) + backup 3-2-1 (per §17.18 when scale matters) + CI/CD pre-merge gates (per §17.19) + MDR Class IIb change control scaffolding (per §17.20) + **engine-agnostic LLM substrate abstraction lift** (per V28 D.21 + D.22 + Section 17.5 — built starting THIS step, NOT deferred; the `lib/llm/anthropic.ts` call site from Step 4.3 moves behind the abstraction without semantics change; concrete backend remains Claude API direct per D.22 unless the deployment overrides).
 
 Infrastructure activation per scope demand: Cloud Run europe-west8 / Hostinger KVM 4 activated when Python services tier work begins; Inngest activated when first cross-Builder workflow needs durable execution; observability stack activated when production traffic exists. All abstraction-clean swaps later per V28 D.20.
 
