@@ -12,7 +12,7 @@ import {
   updateAppointment,
 } from "@/lib/db/appointments";
 import { parseIntent } from "@/lib/intents/parse";
-import { createAnthropicProvider } from "@/lib/llm/anthropic";
+import { getLlmProvider } from "@/lib/llm";
 import {
   clearPendingDisambiguation,
   readContext,
@@ -85,7 +85,7 @@ export async function interpretUtterance(
   const channelId = CHANNEL_FOR_ROOM("CT1");
   recordUtterance(tenantId, channelId, utterance);
 
-  const provider = createAnthropicProvider();
+  const provider = getLlmProvider();
   const todayLocal = new Date().toISOString().slice(0, 10);
   const parsed = await parseIntent(
     { utterance, context: { todayLocalDate: todayLocal, currentRoomId: "CT1" } },

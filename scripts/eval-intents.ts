@@ -4,7 +4,8 @@ import { config } from "dotenv";
 import { z } from "zod";
 import { parseIntent } from "@/lib/intents/parse";
 import { Intent } from "@/lib/intents/schema";
-import { createAnthropicProvider } from "@/lib/llm/anthropic";
+import { getLlmProvider } from "@/lib/llm";
+import type { LlmProvider } from "@/lib/llm";
 
 // Step 4.3 failure-mode trigger: intent-parse correctness ≥90% on the corpus.
 // Run against the live Claude API: `npx tsx scripts/eval-intents.ts`.
@@ -35,7 +36,7 @@ async function main(): Promise<void> {
     );
     process.exit(0);
   }
-  const provider = mock ? mockProvider() : createAnthropicProvider();
+  const provider = mock ? mockProvider() : getLlmProvider();
 
   let pass = 0;
   let fail = 0;
@@ -112,15 +113,15 @@ function compareIntent(actual: Intent, expected: Record<string, unknown>): strin
   return null;
 }
 
-function mockProvider() {
+function mockProvider(): LlmProvider {
   // Stub that always returns view_schedule — verifies the harness wires up.
   return {
-    parseStructured: async () => ({
-      parsed: { intent: "view_schedule", room_id: "CT1", when: "today" },
+    parseStructured: async <T>() => ({
+      parsed: { intent: "view_schedule", room_id: "CT1", when: "today" } as unknown as T,
       usage: { inputTokens: 0, outputTokens: 0, cacheCreationInputTokens: 0, cacheReadInputTokens: 0 },
       modelLatencyMs: 0,
     }),
-  } as ReturnType<typeof createAnthropicProvider>;
+  };
 }
 
 main().catch((err) => {

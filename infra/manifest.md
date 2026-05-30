@@ -55,17 +55,19 @@ Update on every change to deployed infrastructure or environment configuration.
   - `NEXT_PUBLIC_SUPABASE_URL`
   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
   - `SUPABASE_SERVICE_ROLE_KEY` (server-side only; never `NEXT_PUBLIC_*`)
-  - `ANTHROPIC_API_KEY` (server-side only; powers the L5 intent parse path)
+  - `AIRIS_LLM_BACKEND` (optional; selects the active LLM backend behind the engine-agnostic abstraction per V28 D.21; defaults to `anthropic` per V28 D.22; more backends arrive as Phase A subsystems add provider implementations under `lib/llm/`)
+  - `ANTHROPIC_API_KEY` (required when `AIRIS_LLM_BACKEND=anthropic`; server-side only)
   - `ANTHROPIC_BASE_URL` (optional override)
   - `ANTHROPIC_MODEL` (optional; defaults to `claude-opus-4-7` in source)
   - `ANTHROPIC_THINKING` (optional; `adaptive` | `disabled`; default `adaptive`)
   - `ANTHROPIC_EFFORT` (optional; `low` | `medium` | `high` | `xhigh` | `max`; default `low` for sub-1s SLO)
 
-## LLM backend (Phase 0)
+## LLM backend (Phase A)
 
-- **Current concrete backend:** Claude API direct (per V28 D.22). An instance of deployment Mode 2 (online API) under the engine-agnostic abstraction.
-- **Abstraction layer:** engine-agnostic LLM substrate (per V28 D.21) — three deployment modes (client-local self-hosted, online API, AIRIS-hosted non-HQ). Abstraction built from Step 4.5; Step 4.3 paradigm prototype calls Claude API directly and moves behind the abstraction at Step 4.5 without semantics change. Earlier framings (Ollama VPS / Bedrock EU / Mistral La Plateforme EU) retired as platform commitments per the 2026-05-28 strategy session reframe; see Master Doc D.21 + D.22 supersession history.
-- **Model + version:** record the active Claude model name + version in this manifest as deployments configure them. Phase 0 dev uses the model identifier set in `ANTHROPIC_API_KEY`'s associated workspace; no specific version pinned in this Master Doc.
+- **Abstraction layer:** engine-agnostic LLM substrate per V28 D.21 — three deployment modes (client-local self-hosted, online API, AIRIS-hosted non-HQ). **Lifted at Step 4.5**: contract at `lib/llm/types.ts`; lookup at `lib/llm/index.ts` (`getLlmProvider()`); concrete backend selection via `AIRIS_LLM_BACKEND` env var. Application code imports `getLlmProvider()` from `@/lib/llm` and never touches concrete provider files directly — that's the invariant the abstraction enforces.
+- **Current concrete backend:** Claude API direct (per V28 D.22). An instance of deployment Mode 2 (online API). Lives at `lib/llm/anthropic.ts`. Default when `AIRIS_LLM_BACKEND` is unset or set to `anthropic`.
+- **Future concrete backends** (land as their respective deployment modes get exercised; not yet implemented): Mode 1 client-local self-hosted (e.g. Ollama-backed); Mode 3 AIRIS-hosted non-HQ. Adding a backend means: (1) implement `LlmProvider` from `@/lib/llm/types` in a new file under `lib/llm/`; (2) extend the switch in `lib/llm/index.ts`; (3) document the new env-var contract in this file. Earlier framings (Ollama VPS / Bedrock EU / Mistral La Plateforme EU) retired as platform commitments per the 2026-05-28 strategy session reframe; see Master Doc D.21 + D.22 supersession history.
+- **Model + version:** record the active Claude model name + version in this manifest as deployments configure them. Phase A dev uses the model identifier set in `ANTHROPIC_API_KEY`'s associated workspace; no specific version pinned in this Master Doc.
 
 ## Secret names (values NOT in repo)
 
