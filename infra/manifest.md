@@ -38,10 +38,11 @@ Update on every change to deployed infrastructure or environment configuration.
 - **Package manager:** npm.
 - **Node:** verified on Node 22 (Next 16 requires Node ≥ 18.18).
 - **Entry points:** `app/layout.tsx` (`lang="en"` per V28 D.24), `app/page.tsx`, `app/scheduler/page.tsx` (Step 4.3 CT-scheduling paradigm prototype).
-- **API routes:** `app/api/patients/route.ts` (GET list + POST), `app/api/patients/[id]/route.ts` (GET + PATCH + DELETE).
+- **API routes:** `app/api/patients/route.ts` (GET list + POST), `app/api/patients/[id]/route.ts` (GET + PATCH + DELETE), `app/api/inngest/route.ts` (Inngest serve — GET/POST/PUT; dormant until Inngest Cloud connected).
 - **Server actions:** `app/scheduler/actions.ts` (`interpretUtterance`, `confirmContrastBooking`, `loadGridForCT1`).
 - **Audited mutations:** `lib/audit/emitter.ts` (`emitAuditEvent`) is the single Node-side audited path per D.17 + §17.9 — build the CloudEvents v1.0.2 envelope, dispatch the atomic RPC, and let the DB function write row + `event_queue` outbox + hash-chained L6 audit row in one transaction. `lib/db/patients.ts` + `lib/db/appointments.ts` delegate to it; later subsystems call it instead of re-rolling per-RPC. Chain ordering (per-tenant monotonic `chain_sequence`) stays in `airis_internal.audit_events_append`.
-- **Runtime deps:** `@supabase/supabase-js`, `@supabase/ssr`, `@anthropic-ai/sdk`, `@upstash/redis`, `zod`, `ulid`.
+- **Runtime deps:** `@supabase/supabase-js`, `@supabase/ssr`, `@anthropic-ai/sdk`, `@upstash/redis`, `inngest`, `zod`, `ulid`.
+- **Server-side admin client:** `lib/supabase/admin.ts` (`createSupabaseAdminClient`) — service-role client for jobs with no user session (Inngest functions); bypasses RLS, server-only, never imported client-side.
 - **Test runner:** Vitest (dev dep), test scripts `npm run test` / `npm run test:watch`. Unit tests run unconditionally; integration tests under `tests/*.roundtrip.test.ts` + `tests/realtime.policy.test.ts` skip when `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` / `SUPABASE_SERVICE_ROLE_KEY` are absent (env-gated via `tests/setup.ts`).
 - **Intent corpus harness:** `npm run eval:intents` (uses `tsx`) runs the English intent corpus against the live Claude API; exits non-zero on <90% pass-rate. Skips with a clean exit when `ANTHROPIC_API_KEY` is unset; `INTENT_EVAL_MOCK=1` runs structure-only.
 - **Scripts:** `npm run dev | build | start | lint | test | test:watch | typecheck | check:migrations | changelog | eval:intents`.
@@ -79,8 +80,7 @@ Mattia creates the account + provides secrets, Claude wires the code behind the
 Onboarding checklist + sequencing in `docs/Step_4.5_Turn2_plan.md`. Record live
 URLs / dashboard links here as each lands.
 
-- **Inngest Cloud (EU)** — D.16 + §17.3 durable execution; first use is the
-  `event_queue` outbox drain/fan-out. App id `airis`. Selector `AIRIS_EVENTS_BACKEND` (`outbox` default | `inngest`). Serve endpoint planned at `app/api/inngest/route.ts`.
+- **Inngest Cloud (EU)** — D.16 + §17.3 durable execution. **Code landed (sub-deliverable D):** client `lib/inngest/client.ts` (app id `airis`); serve endpoint `app/api/inngest/route.ts`; first function `drainOutbox` (cron, `lib/inngest/functions.ts`) drains the `event_queue` outbox via the pure `drainEventQueue` (`lib/events/drain.ts`, unit-tested) and relays each CloudEvent onto the per-tenant `tenant:{id}:events` bus (foundation for the Step 4.7 Event System; distinct from the scheduler's direct L2 broadcast). **Dormant** until `INNGEST_EVENT_KEY` / `INNGEST_SIGNING_KEY` are set + the serve endpoint is registered with Inngest Cloud — Phase 0 behaviour preserved. **Pending live validation.** (`AIRIS_EVENTS_BACKEND` reserved for a future emit-time relay; the cron drain doesn't use it.)
 - **Upstash Redis (EU)** — §17.4 L3 cache. **Code landed (sub-deliverable E):** `lib/consciousness/cache.ts` is now an async `CacheBackend` contract; `memory` (default, Phase 0 in-process Map) and `upstash` (`lib/consciousness/cache.upstash.ts`, lazily imported) backends selected by `AIRIS_CACHE_BACKEND`. Async-API decision = option 1 from the Turn 2 plan. **Pending live validation:** create the EU Redis DB + set `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN`, then flip `AIRIS_CACHE_BACKEND=upstash` on a preview and confirm cross-process round-trip.
 - **Sentry (EU)** — §17.17 SRE error capture (Next.js client/server/edge). Disjoint from the L6 audit chain by construction (D.17 + §17.16).
 - **Grafana Cloud (EU)** — §17.16 metrics/traces; `TimingTrace` dual-surface latency exported via OTLP. Disjoint from audit observability.
