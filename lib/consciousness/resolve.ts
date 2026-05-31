@@ -37,7 +37,7 @@ export async function resolveReference(
 
   // L3 first — recent action whose slot matches the hour
   if (hour !== null) {
-    const ctx = readContext(input.tenantId, input.channelId);
+    const ctx = await readContext(input.tenantId, input.channelId);
     const match = ctx.recentActions.find((a) => slotHour(a.slotStartLocal) === hour);
     if (match) {
       return { kind: "resolved", appointmentId: match.appointmentId, via: "l3" };
@@ -66,7 +66,7 @@ export async function resolveReference(
   }
 
   // "that" / "it" / "the [name] appointment" — fall back to the most-recent action.
-  const ctx = readContext(input.tenantId, input.channelId);
+  const ctx = await readContext(input.tenantId, input.channelId);
   if (ctx.currentAppointmentId) {
     return { kind: "resolved", appointmentId: ctx.currentAppointmentId, via: "l3" };
   }

@@ -10,12 +10,12 @@ const tenantId = "00000000-0000-0000-0000-000000000001";
 const channelId = "scheduler:CT1";
 
 describe("L3 pendingDisambiguation (substrate write contract)", () => {
-  beforeEach(() => {
-    _clearAllForTest();
+  beforeEach(async () => {
+    await _clearAllForTest();
   });
 
-  it("set + read round-trips the pending booking inputs and candidates", () => {
-    setPendingDisambiguation(tenantId, channelId, {
+  it("set + read round-trips the pending booking inputs and candidates", async () => {
+    await setPendingDisambiguation(tenantId, channelId, {
       room_id: "CT1",
       kind: "CT",
       subtype: "abdomen",
@@ -29,14 +29,14 @@ describe("L3 pendingDisambiguation (substrate write contract)", () => {
       ],
       patient_query: "Rossi",
     });
-    const ctx = readContext(tenantId, channelId);
+    const ctx = await readContext(tenantId, channelId);
     expect(ctx.pendingDisambiguation?.candidates).toHaveLength(2);
     expect(ctx.pendingDisambiguation?.candidates[0]?.label).toBe("Marco Rossi");
     expect(ctx.pendingDisambiguation?.patient_query).toBe("Rossi");
   });
 
-  it("clear drops the pending field but keeps other context", () => {
-    setPendingDisambiguation(tenantId, channelId, {
+  it("clear drops the pending field but keeps other context", async () => {
+    await setPendingDisambiguation(tenantId, channelId, {
       room_id: "CT1",
       kind: "CT",
       subtype: null,
@@ -47,8 +47,8 @@ describe("L3 pendingDisambiguation (substrate write contract)", () => {
       candidates: [{ id: "p1", label: "Marco Rossi" }],
       patient_query: "Rossi",
     });
-    clearPendingDisambiguation(tenantId, channelId);
-    const ctx = readContext(tenantId, channelId);
+    await clearPendingDisambiguation(tenantId, channelId);
+    const ctx = await readContext(tenantId, channelId);
     expect(ctx.pendingDisambiguation).toBeUndefined();
   });
 });
