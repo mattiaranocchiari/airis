@@ -83,7 +83,7 @@ export async function interpretUtterance(
   const finalita = finalitaSchema.parse("cura_diretta");
 
   const channelId = CHANNEL_FOR_ROOM("CT1");
-  recordUtterance(tenantId, channelId, utterance);
+  await recordUtterance(tenantId, channelId, utterance);
 
   const provider = getLlmProvider();
   const todayLocal = new Date().toISOString().slice(0, 10);
@@ -116,7 +116,7 @@ export async function interpretUtterance(
       // intent can resume it with the chosen patient. This is the
       // consciousness.write contract from §17.4 — the substrate is the
       // continuity across turns.
-      setPendingDisambiguation(tenantId, channelId, {
+      await setPendingDisambiguation(tenantId, channelId, {
         room_id: intent.room_id,
         kind: intent.kind,
         subtype: intent.subtype,
@@ -170,7 +170,7 @@ export async function interpretUtterance(
   // against candidates, and auto-complete the original booking. This is the
   // "feels like one event" property in the disambiguation case: the user
   // doesn't re-issue the booking utterance.
-  const state = readContext(tenantId, channelId);
+  const state = await readContext(tenantId, channelId);
   const pending = state.pendingDisambiguation;
   if (!pending) {
     return ok(`noted: ${intent.selection}`, undefined, {
@@ -196,7 +196,7 @@ export async function interpretUtterance(
       candidates: match.matches,
     };
   }
-  clearPendingDisambiguation(tenantId, channelId);
+  await clearPendingDisambiguation(tenantId, channelId);
   return attemptBooking(db, ctx, {
     room_id: pending.room_id,
     kind: pending.kind,
@@ -241,7 +241,7 @@ export async function confirmContrastBooking(
     ctx,
   );
   const channelId = CHANNEL_FOR_ROOM(pending.room_id);
-  recordAction(tenantId, channelId, {
+  await recordAction(tenantId, channelId, {
     kind: "create",
     appointmentId: created.appointment_id,
     when: new Date().toISOString(),
@@ -320,7 +320,7 @@ export async function moveAppointmentByDrag(
   const rpcDoneTs = Date.now();
 
   const channelId = CHANNEL_FOR_ROOM(existing.room_id);
-  recordAction(tenantId, channelId, {
+  await recordAction(tenantId, channelId, {
     kind: "update",
     appointmentId,
     when: new Date().toISOString(),
@@ -447,7 +447,7 @@ async function attemptBooking(
   );
   const rpcDoneTs = Date.now();
   const channelId = CHANNEL_FOR_ROOM(b.room_id);
-  recordAction(ctx.tenantId, channelId, {
+  await recordAction(ctx.tenantId, channelId, {
     kind: "create",
     appointmentId: created.appointment_id,
     when: new Date().toISOString(),
@@ -520,7 +520,7 @@ async function handleMove(
     ctx,
   );
   const rpcDoneTs = Date.now();
-  recordAction(ctx.tenantId, channelId, {
+  await recordAction(ctx.tenantId, channelId, {
     kind: "update",
     appointmentId: resolved.appointmentId,
     when: new Date().toISOString(),
@@ -580,7 +580,7 @@ async function handleCancel(
   }
   await cancelAppointment(db, resolved.appointmentId, ctx);
   const rpcDoneTs = Date.now();
-  recordAction(ctx.tenantId, channelId, {
+  await recordAction(ctx.tenantId, channelId, {
     kind: "cancel",
     appointmentId: resolved.appointmentId,
     when: new Date().toISOString(),

@@ -9,12 +9,12 @@ const tenantId = "00000000-0000-0000-0000-000000000001";
 const channelId = "scheduler:CT1";
 
 describe("consciousness.resolveReference (L3 path)", () => {
-  beforeEach(() => {
-    _clearAllForTest();
+  beforeEach(async () => {
+    await _clearAllForTest();
   });
 
   it("resolves 'the 9 a.m.' to the recent action whose slot starts at 09:00", async () => {
-    recordAction(tenantId, channelId, {
+    await recordAction(tenantId, channelId, {
       kind: "create",
       appointmentId: "apt-1",
       when: new Date().toISOString(),
@@ -38,7 +38,7 @@ describe("consciousness.resolveReference (L3 path)", () => {
   });
 
   it("resolves 'the 14' to a 2pm slot via 24-hour parsing", async () => {
-    recordAction(tenantId, channelId, {
+    await recordAction(tenantId, channelId, {
       kind: "create",
       appointmentId: "apt-2",
       when: new Date().toISOString(),
